@@ -1,0 +1,26 @@
+# Librerías base para cálculos y manejo de datos
+numpy>=1.24.0
+requests>=2.31.0
+scipy>=1.10.0
+pandas>=2.0.0
+
+# Logging avanzado y análisis de código
+loguru>=0.7.0
+asttokens>=2.2.1
+
+# Frameworks de testing y cobertura
+pytest>=8.0
+pytest-cov>=4.0
+
+# Mocks y pruebas unitarias
+mock>=5.0
+
+# Calidad de código y análisis estático
+flake8>=6.0
+mypy>=1.0
+
+# Formateo de código (opcional pero recomendado)
+black>=23.0
+
+# Documentación (opcional)
+sphinx>=7.0

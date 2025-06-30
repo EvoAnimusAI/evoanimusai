@@ -1,0 +1,7 @@
+- action: "MOVE_FORWARD"
+  priority: 1.0
+  reward: 0.1
+
+- action: "WAIT"
+  priority: 0.5
+  reward: 0.0

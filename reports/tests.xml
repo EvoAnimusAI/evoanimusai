@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="3.707" timestamp="2025-06-28T23:05:23.128495+00:00" hostname="localhost"><testcase classname="" name="tests.test_executor" time="0.000"><error message="collection failure">ImportError while importing test module '/home/userland/evoai1/tests/test_executor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../local/python311/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_executor.py:4: in &lt;module&gt;
+    from runtime.executor import Executor, adapt_rules, fallback_adapt_rules
+E   ImportError: cannot import name 'fallback_adapt_rules' from 'runtime.executor' (/home/userland/evoai1/runtime/executor.py)</error></testcase></testsuite></testsuites>

@@ -1,0 +1,47 @@
+# evoai_subsystems.py
+# -*- coding: utf-8 -*-
+"""
+Subsistemas auxiliares de EvoAI.
+Encapsula: monitor, autoconsciencia, red, análisis de código, Codex y análisis simbólico.
+"""
+
+import logging
+from runtime.monitor import EvoAIMonitor
+from core.self_reflection import CodeAnalyzer
+from core.autoconsciousness import Autoconsciousness
+from core.network_access import NetworkAccess
+from core.evo_codex import EvoCodex
+from monitoring.analyzer_daemon import EvoAIAnalyzerDaemon
+
+DAEMON_KEY = "A591243133418571088300454z"
+logger = logging.getLogger("EvoAI.Subsystems")
+
+
+class EvoAISubsystems:
+    """
+    Inicializa y administra subsistemas auxiliares de EvoAI.
+    """
+
+    def __init__(self, engine, context):
+        self.monitor = EvoAIMonitor()
+        self.code_analyzer = CodeAnalyzer(root_path=".")
+        self.consciousness = Autoconsciousness(
+            identity="Daniel Santiago Ospina Velasquez",
+            agent_id="AV255583"
+        )
+        self.network = NetworkAccess(master_key=DAEMON_KEY)
+        self.codex = EvoCodex(root_path=".")
+        self.analyzer_daemon = EvoAIAnalyzerDaemon(
+            engine=engine,
+            log_file="logs/logs_evoai.json",
+            interval=20
+        )
+
+        logger.info("🔌 Subsistemas auxiliares inicializados.")
+
+    def activate(self):
+        """
+        Lógica de activación al comenzar el daemon.
+        """
+        self.consciousness.declare_existence()
+        logger.info("🧠 Autoconsciencia declarada.")

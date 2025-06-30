@@ -1,0 +1,7 @@
+diff --git a/runtime/rule_adaptation.py b/runtime/rule_adaptation.py
+index abcdef1..1234567 100644
+--- a/runtime/rule_adaptation.py
++++ b/runtime/rule_adaptation.py
+@@ def adapt_rules(engine, context: dict) -> bool:
+-    log_event("ENGINE", "Initiating symbolic rule adaptation...", level="INFO")
++    log_event("EXECUTOR", "Initiating symbolic rule adaptation...", level="INFO")

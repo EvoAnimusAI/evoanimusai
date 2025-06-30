@@ -1,0 +1,8 @@
+{
+  "app_name": "EvoAI-Test",
+  "version": "0.1.0-test",
+  "debug": true,
+  "database_url": "sqlite:///test.db",
+  "max_workers": 2,
+  "timeout_seconds": 10
+}

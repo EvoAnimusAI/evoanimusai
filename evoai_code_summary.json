@@ -1,0 +1,10 @@
+{
+  "/tmp/pytest-of-userland/pytest-65/test_sample_project0/valid.py": {
+    "functions": [
+      "foo"
+    ],
+    "classes": [
+      "Bar"
+    ]
+  }
+}

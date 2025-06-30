@@ -1,0 +1,22 @@
+# evoai_visualization.py
+# -*- coding: utf-8 -*-
+"""
+Módulo de visualización simbólica del estado interno de EvoAI.
+Permite monitorear decisiones, recompensas y contexto, en tiempo real o diferido.
+"""
+
+import logging
+from visual.symbolic_view import show_symbolic_state
+
+logger = logging.getLogger("EvoAI.Visualization")
+
+
+def render_symbolic_state(context, decision, observation, reward):
+    """
+    Llama al motor gráfico para mostrar el estado simbólico del agente.
+    Captura excepciones sin interrumpir el flujo del sistema.
+    """
+    try:
+        show_symbolic_state(context, decision, observation, reward)
+    except Exception as e:
+        logger.warning(f"[Visualización] Falló renderización simbólica: {e}")

@@ -1,0 +1,131 @@
+import json
+import threading
+import logging
+from typing import Any, Dict, Optional
+
+class StateManager:
+    """
+    Thread-safe manager for application state.
+
+    Provides mechanisms to store, retrieve, update and persist
+    state data in JSON format with strong error handling and logging.
+    """
+
+    def __init__(self, initial_state: Optional[Dict[str, Any]] = None) -> None:
+        self._state: Dict[str, Any] = initial_state or {}
+        self._lock = threading.RLock()
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug("[StateManager] Initialized with state: %s", self._state)
+
+    def get_state(self) -> Dict[str, Any]:
+        """
+        Returns a deep copy of the current state to avoid external mutation.
+
+        Returns:
+            Dict[str, Any]: The current state snapshot.
+        """
+        with self._lock:
+            state_copy = json.loads(json.dumps(self._state))
+            self._logger.debug("[StateManager] State retrieved: %s", state_copy)
+            return state_copy
+
+    def get(self, key: str, default: Optional[Any] = None) -> Any:
+        """
+        Retrieves a value by key from the state.
+
+        Args:
+            key (str): Key to retrieve.
+            default (Any): Default value if key not found.
+
+        Returns:
+            Any: Value associated with key or default.
+        """
+        with self._lock:
+            value = self._state.get(key, default)
+            self._logger.debug("[StateManager] Get key '%s': %s", key, value)
+            return value
+
+    def set(self, key: str, value: Any) -> None:
+        """
+        Sets or updates a key-value pair in the state.
+
+        Args:
+            key (str): Key to set.
+            value (Any): Value to associate.
+        """
+        with self._lock:
+            self._state[key] = value
+            self._logger.debug("[StateManager] Set key '%s' to %s", key, value)
+
+    def update(self, new_state: Dict[str, Any]) -> None:
+        """
+        Updates the internal state with a dictionary of new key-value pairs.
+
+        Args:
+            new_state (Dict[str, Any]): Dictionary of updates.
+        """
+        if not isinstance(new_state, dict):
+            self._logger.error("[StateManager] update() received invalid type: %s", type(new_state))
+            raise TypeError("new_state must be a dictionary")
+
+        with self._lock:
+            self._state.update(new_state)
+            self._logger.debug("[StateManager] State updated with: %s", new_state)
+
+    def save_to_file(self, filepath: str) -> None:
+        """
+        Saves the current state to a JSON file.
+
+        Args:
+            filepath (str): Path of the file to save the state.
+        """
+        with self._lock:
+            try:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    json.dump(self._state, f, indent=2)
+                self._logger.info("[StateManager] State saved to %s", filepath)
+            except IOError as err:
+                self._logger.error("[StateManager] Failed to save state to %s: %s", filepath, err)
+                raise
+
+    def load_from_file(self, filepath: str) -> None:
+        """
+        Loads state data from a JSON file, replacing current state.
+
+        Args:
+            filepath (str): Path of the JSON file to load.
+        """
+        with self._lock:
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    loaded_state = json.load(f)
+                if not isinstance(loaded_state, dict):
+                    raise ValueError("Loaded state must be a dictionary")
+                self._state = loaded_state
+                self._logger.info("[StateManager] State loaded from %s", filepath)
+            except (IOError, json.JSONDecodeError, ValueError) as err:
+                self._logger.error("[StateManager] Failed to load state from %s: %s", filepath, err)
+                raise
+
+    def clear(self) -> None:
+        """
+        Clears the current state.
+        """
+        with self._lock:
+            self._state.clear()
+            self._logger.debug("[StateManager] State cleared.")
+
+    def status(self) -> Dict[str, Any]:
+        """
+        Returns a summary status dictionary for monitoring or snapshot.
+
+        Returns:
+            Dict[str, Any]: Status information of the current state.
+        """
+        with self._lock:
+            status_info = {
+                "keys_count": len(self._state),
+                "has_data": bool(self._state),
+            }
+            self._logger.debug("[StateManager] Status retrieved: %s", status_info)
+            return status_info

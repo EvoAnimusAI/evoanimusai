@@ -1,0 +1,93 @@
+import os
+import ast
+import json
+import logging
+from typing import Dict, List, Optional, Set
+
+
+class CodeAnalyzer:
+    """
+    Clase para analizar estáticamente proyectos Python.
+
+    Explora recursivamente directorios, analiza archivos `.py` para
+    extraer funciones y clases definidas, y guarda un resumen JSON.
+
+    Parámetros:
+        root_path (str): Ruta raíz donde comienza el escaneo.
+        ignore_dirs (Optional[Set[str]]): Conjunto de nombres de directorios a ignorar.
+    """
+
+    def __init__(self, root_path: str = ".", ignore_dirs: Optional[Set[str]] = None) -> None:
+        self.root_path: str = root_path
+        self.ignore_dirs: Set[str] = ignore_dirs if ignore_dirs else {"venv", "__pycache__", "wheels"}
+        self.file_data: Dict[str, Dict[str, List[str]]] = {}
+        self.logger = logging.getLogger(__name__)
+
+    def scan_project(self) -> None:
+        """
+        Escanea el proyecto a partir de root_path, recopilando datos de
+        funciones y clases en cada archivo Python válido.
+        """
+        self.file_data.clear()
+        for dirpath, dirnames, filenames in os.walk(self.root_path):
+            # Filtrar directorios ignorados in-place para os.walk
+            dirnames[:] = [d for d in dirnames if d not in self.ignore_dirs]
+
+            for filename in filenames:
+                if filename.endswith(".py"):
+                    filepath = os.path.join(dirpath, filename)
+                    try:
+                        analysis = self.analyze_file(filepath)
+                        if analysis:
+                            self.file_data[filepath] = analysis
+                    except Exception as ex:
+                        self.logger.warning(f"[CodeAnalyzer] Error analyzing {filepath}: {ex}")
+
+        self.save_summary()
+
+    def analyze_file(self, filepath: str) -> Optional[Dict[str, List[str]]]:
+        """
+        Analiza un archivo Python para extraer nombres de funciones y clases.
+
+        Args:
+            filepath (str): Ruta del archivo a analizar.
+
+        Returns:
+            Optional[Dict[str, List[str]]]: Diccionario con claves "functions" y "classes",
+                listas de nombres; o None si falla análisis o archivo no existe.
+        """
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                source = f.read()
+            tree = ast.parse(source, filename=filepath)
+        except (SyntaxError, UnicodeDecodeError, FileNotFoundError) as err:
+            self.logger.error(f"[CodeAnalyzer] Error parsing {filepath}: {err}")
+            return None
+
+        functions = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+        classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+        return {"functions": functions, "classes": classes}
+
+    def summarize(self) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Devuelve el resumen acumulado del análisis.
+
+        Returns:
+            Dict[str, Dict[str, List[str]]]: Datos de funciones y clases por archivo.
+        """
+        return self.file_data
+
+    def save_summary(self, filename: str = "evoai_code_summary.json") -> None:
+        """
+        Guarda el resumen en un archivo JSON.
+
+        Args:
+            filename (str): Nombre del archivo donde guardar el resumen.
+        """
+        try:
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(self.file_data, f, indent=2)
+            self.logger.info(f"[CodeAnalyzer] Summary saved to {filename}")
+        except IOError as err:
+            self.logger.error(f"[CodeAnalyzer] Failed to save summary: {err}")

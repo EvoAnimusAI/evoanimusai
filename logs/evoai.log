@@ -1,0 +1,22 @@
+2025-06-30 21:44:59 | DEBUG | evoai | Mensaje DEBUG
+2025-06-30 21:44:59 | INFO | evoai | Mensaje INFO
+2025-06-30 21:44:59 | WARNING | evoai | Mensaje WARNING
+2025-06-30 21:44:59 | ERROR | evoai | Mensaje ERROR
+2025-06-30 21:44:59 | CRITICAL | evoai | Mensaje CRITICAL
+2025-06-30 21:44:59 | INFO | evoai | [Unknown level: NOEXISTE] Mensaje nivel desconocido
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: test_event | Detalles: {'foo': 'bar'}
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: simple_event | Detalles: {}
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Initiating symbolic rule adaptation...
+2025-06-30 21:44:59 | ERROR | evoai.utils.logging | Evento: ENGINE | Detalles: Mutation failed: Boom
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Initiating symbolic rule adaptation...
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Initiating symbolic rule adaptation...
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Mutation performed during adaptation.
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Initiating symbolic rule adaptation...
+2025-06-30 21:44:59 | WARNING | evoai.utils.logging | Evento: ENGINE | Detalles: No valid mutate_rules() method found.
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Executing fallback adaptation...
+2025-06-30 21:44:59 | INFO | evoai.utils.logging | Evento: ENGINE | Detalles: Executing fallback adaptation...
+2025-06-30 21:44:59 | INFO | evoai.interpreter | [⚡ Creando] ExpresionSimbolica desde texto: valid expression
+2025-06-30 21:44:59 | INFO | evoai.interpreter | [✅ Creada] Expresión simbólica: valid expression
+2025-06-30 21:44:59 | INFO | evoai.interpreter | [⚡ Creando] ExpresionSimbolica desde texto: expr1
+2025-06-30 21:44:59 | INFO | evoai.interpreter | [✅ Creada] Expresión simbólica: expr1
+2025-06-30 21:44:59 | INFO | evoai.interpreter | [✅ Creada] Expresión simbólica: mock

@@ -1,0 +1,40 @@
+diff --git a/tests/test_evaluation.py b/tests/test_evaluation.py
+index abcdef1..1234567 100644
+--- a/tests/test_evaluation.py
++++ b/tests/test_evaluation.py
+@@
++import pytest
+
++@pytest.fixture
++def temp_data_dir(tmp_path):
++    return str(tmp_path)
+
+diff --git a/tests/test_persistence.py b/tests/test_persistence.py
+index abcdef1..1234567 100644
+--- a/tests/test_persistence.py
++++ b/tests/test_persistence.py
+@@
++import pytest
+
++@pytest.fixture
++def temp_data_dir(tmp_path):
++    return str(tmp_path)
+
+diff --git a/tests/test_evoai_context.py b/tests/test_evoai_context.py
+index abcdef1..1234567 100644
+--- a/tests/test_evoai_context.py
++++ b/tests/test_evoai_context.py
+@@
+ from daemon.evoai_context import EvoAIContext
++from symbolic_ai.symbolic_learning_engine import SymbolicLearningEngine, RuleEngineInterface
+
++class DummyRuleEngine(RuleEngineInterface):
++    def evaluate(self, rule, context):
++        return True
+
+ @pytest.fixture
+-def evoai_context():
+-    return EvoAIContext()
++def evoai_context():
++    dummy_engine = DummyRuleEngine()
++    return EvoAIContext(rule_engine=dummy_engine)

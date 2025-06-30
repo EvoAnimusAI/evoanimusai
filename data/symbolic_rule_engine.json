@@ -1,0 +1,39 @@
+{
+  "rules": [
+    {
+      "rol": "action",
+      "valor": "explore",
+      "accion": "move_forward",
+      "condicion": "noise == 'calm'",
+      "texto": "⟦action:explore⟧ ⇒ move_forward :: noise == 'calm'"
+    },
+    {
+      "rol": "action",
+      "valor": "rest",
+      "accion": "pause",
+      "condicion": "noise == 'chaos'",
+      "texto": "⟦action:rest⟧ ⇒ pause :: noise == 'chaos'"
+    },
+    {
+      "rol": "state",
+      "valor": "active",
+      "accion": "explore",
+      "condicion": "pos >= 0",
+      "texto": "⟦state:active⟧ ⇒ explore :: pos >= 0"
+    },
+    {
+      "rol": "temperature",
+      "valor": ">37",
+      "accion": "alert = 'fever'",
+      "condicion": "True",
+      "texto": "temperature:>37 => alert = 'fever' :: True"
+    },
+    {
+      "rol": "humidity",
+      "valor": "<20",
+      "accion": "status = 'dry'",
+      "condicion": "True",
+      "texto": "humidity:<20 => status = 'dry' :: True"
+    }
+  ]
+}

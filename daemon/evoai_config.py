@@ -1,0 +1,47 @@
+# evoai_config.py
+# -*- coding: utf-8 -*-
+
+"""
+Configuración centralizada del sistema EvoAI (Nivel gubernamental).
+
+Este módulo define los parámetros críticos de operación, las rutas estructurales
+y los valores que controlan la ejecución y estabilidad de EvoAI Super Daemon.
+"""
+
+import os
+from pathlib import Path
+from typing import Final, Dict, List
+
+# --- Seguridad y Control de Acceso ---
+DAEMON_KEY: Final[str] = "A591243133418571088300454z"
+MAX_ERRORS: Final[int] = 10
+
+# --- Parámetros de Ejecución ---
+CYCLE_DELAY: Final[int] = 30                   # Intervalo entre ciclos (en segundos)
+CYCLES_TO_MUTATE: Final[int] = 10              # Ciclos antes de forzar mutación
+TEST_CYCLES: Final[int] = 1                    # Límite de ciclos en modo prueba
+
+# --- Rutas Críticas ---
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
+LOG_DIR: Path = BASE_DIR / "logs"
+LOG_FILE: Final[str] = "evoai.log"             # ← CORRECCIÓN: Archivo de log principal
+LOG_PATH: Path = LOG_DIR / LOG_FILE            # Ruta completa (opcional para trazabilidad)
+
+KNOWLEDGE_LOGS_DIR: Path = BASE_DIR / "knowledge_logs"
+MUTATED_FUNCTIONS_DIR: Path = BASE_DIR / "data" / "mutated_functions"
+SYMBOLIC_MEMORY_PATH: Path = BASE_DIR / "data" / "symbolic_memory.json"
+MEMORY_PATH: Path = BASE_DIR / "symbolic_memory.json"
+
+# --- Variables del Modelo Simbólico ---
+DEFAULT_PREFERRED_TOPICS: List[str] = ["calm_down", "slow_down"]
+SYMBOLIC_NOISES: List[str] = ["neutral", "harmonic", "chaos", "tension", "calm", None]
+SYMBOLIC_STATES: List[str] = ["normal", "active", "stressed"]
+
+# --- Aprendizaje Externo / Inteligencia Expandida ---
+LEARNING_URLS: Dict[str, str] = {
+    "symbolic evolution": "https://en.wikipedia.org/wiki/Evolutionary_algorithm",
+}
+
+# --- Inicialización de Carpetas (Garantiza consistencia del entorno) ---
+for directory in [LOG_DIR, KNOWLEDGE_LOGS_DIR, MUTATED_FUNCTIONS_DIR]:
+    os.makedirs(directory, exist_ok=True)

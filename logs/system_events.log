@@ -1,0 +1,9 @@
+[2025-06-30 21:44:59] [INFO] [ERROR_EVALUATING_STRATEGY] Traceback (most recent call last):
+  File "/home/userland/evoai1/strategies/strategy_manager.py", line 151, in evaluate_strategy
+    result = strategy_func(data)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/userland/evoai1/tests/test_strategy_manager.py", line 94, in bad_func
+    raise RuntimeError("fail")
+RuntimeError: fail
+
+[2025-06-30 21:44:59] [INFO] [ERROR_LOADING_STRATEGY] Función 'unavailable' no encontrada o no callable en strategies/unavailable.py

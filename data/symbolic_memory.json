@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "name": "prueba",
+      "code": "def prueba(): return 42",
+      "metadata": {}
+    }
+  ]
+}
