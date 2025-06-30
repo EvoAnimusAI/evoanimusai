@@ -1,23 +1,5 @@
-# Python artifacts
-__pycache__/
-*.py[cod]
-*.egg-info/
 .env
-*.env
-.venv/
 *.log
-*.sqlite
-*.db
-
-# Test & coverage
-htmlcov/
-coverage/
-.tox/
-.nox/
-.mypy_cache/
-.pytest_cache/
-tests/__pycache__/
-
-# IDE/editor config
-.vscode/
-.idea/
+*.pyc
+__pycache__/
+.env
