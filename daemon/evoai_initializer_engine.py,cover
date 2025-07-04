@@ -1,0 +1,29 @@
+  # daemon/evoai_initializer_engine.py
+! import logging
+! from core.engine import EvoAIEngine
+  
+! logger = logging.getLogger("EvoAI.Initializer.Engine")
+  
+  
+! def initialize_engine(agent=None, context=None):
+!     """
+!     Inicializa y configura el motor EvoAI principal.
+  
+!     Args:
+!         agent (optional): Agente para asignar al motor (actualmente no utilizado).
+!         context (optional): Contexto operativo asociado (actualmente no utilizado).
+  
+!     Returns:
+!         EvoAIEngine: Instancia configurada del motor EvoAI.
+  
+!     Raises:
+!         Exception: Para errores durante la inicialización.
+!     """
+!     try:
+!         logger.info("[Engine Init] Inicializando motor EvoAI sin parámetros...")
+!         engine = EvoAIEngine()  # Se instancia sin pasar agent ni context
+!         logger.info("[Engine Init] Motor inicializado correctamente.")
+!         return engine
+!     except Exception as e:
+!         logger.error(f"[Engine Init] Error durante inicialización del motor: {e}")
+!         raise

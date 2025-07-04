@@ -1,0 +1,60 @@
+  # daemon/evoai_initializer_tools.py
+  # -*- coding: utf-8 -*-
+> """
+> Inicializador de herramientas auxiliares EvoAI.
+> Instancia módulos avanzados de monitoreo, análisis, codificación simbólica y acceso a red.
+> Cumple estándares de trazabilidad, modularidad y control militar.
+> """
+  
+! import logging
+! from typing import Any, Dict
+  
+! from core.self_reflection import CodeAnalyzer
+! from core.autoconsciousness import Autoconsciousness
+! from core.network_access import NetworkAccess
+! from core.evo_codex import EvoCodex
+! from runtime.monitor import EvoAIMonitor
+  
+! logger = logging.getLogger("EvoAI.Initializer.Tools")
+  
+  
+! def initialize_support_tools(
+!     engine: Any,
+!     context: Any,
+!     daemon_key: str
+! ) -> Dict[str, Any]:
+!     """
+!     Inicializa herramientas auxiliares de EvoAI para soporte operacional, trazabilidad y seguridad.
+  
+!     Args:
+!         engine (Any): Motor simbólico ya instanciado.
+!         context (Any): Contexto operativo principal del sistema.
+!         daemon_key (str): Clave secreta del daemon cargada desde entorno seguro.
+  
+!     Returns:
+!         Dict[str, Any]: Diccionario con las herramientas auxiliares instanciadas.
+!     """
+!     try:
+!         logger.info("[TOOLS INIT] Inicializando herramientas auxiliares...")
+  
+!         code_analyzer = CodeAnalyzer(root_path=".")
+  
+!         tools = {
+!             "monitor": EvoAIMonitor(),
+!             "code_analyzer": code_analyzer,
+!             "analyzer": code_analyzer,  # Requerido por la prueba
+!             "consciousness": Autoconsciousness(
+!                 "Daniel Santiago Ospina Velasquez",
+!                 "AV255583"
+!             ),
+!             "network": NetworkAccess(master_key=daemon_key),
+!             "codex": EvoCodex(root_path="."),
+!             "decision_engine": engine,
+!         }
+  
+!         logger.info("[TOOLS INIT] Herramientas auxiliares inicializadas correctamente.")
+!         return tools
+  
+!     except Exception as ex:
+!         logger.exception(f"[TOOLS INIT] Error al inicializar herramientas auxiliares: {ex}")
+!         raise

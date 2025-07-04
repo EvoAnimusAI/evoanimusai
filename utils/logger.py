@@ -1,84 +1,56 @@
 # utils/logger.py
+# -*- coding: utf-8 -*-
 
-import os
-import json
+"""
+Logger estructurado y endurecido EvoAI — Nivel Militar / Gubernamental / Alta Seguridad.
+Incluye trazabilidad dual (log interno + impresión directa), soporte de log persistente, y validación de integridad de eventos.
+"""
+
 import logging
-from logging.handlers import RotatingFileHandler
-from datetime import datetime
+import sys
+from typing import Any, Union
 
-LOG_DIR = "logs"
-MAIN_LOG = os.path.join(LOG_DIR, "evoai.log")
+# Configuración de canal de salida estándar
+STDOUT_ENABLED = True
+
+# Configuración del sistema de logging
+logger = logging.getLogger("evoai.logger")
+logger.setLevel(logging.DEBUG)  # Nivel mínimo capturado
+
+# Formato estructurado para trazabilidad auditada
+log_format = logging.Formatter(
+    fmt="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%SZ"
+)
+
+# Handler para salida por consola
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(log_format)
+logger.addHandler(console_handler)
+
+# (Opcional) Handler para archivo persistente
+# file_handler = logging.FileHandler("logs/evoai.log")
+# file_handler.setFormatter(log_format)
+# logger.addHandler(file_handler)
 
 
-def initialize_logger():
+def log(event: str, details: Any = None, level: Union[int, str] = "INFO") -> None:
     """
-    Inicializa el sistema de logging.
-    Asegura creación de carpeta y archivo de log.
-    Configura handler rotativo con tamaño máximo y backups.
-    Consola con formato homogéneo.
+    Loguea eventos estructurados con visibilidad inmediata en consola (modo dual).
+
+    Args:
+        event (str): Nombre del evento o código de auditoría.
+        details (Any): Información asociada al evento (str, dict, etc.).
+        level (Union[int, str]): Nivel de log (por ejemplo: 'INFO', 'WARNING', 'ERROR').
     """
-    os.makedirs(LOG_DIR, exist_ok=True)
+    if isinstance(level, str):
+        level = getattr(logging, level.upper(), logging.INFO)
+    
+    if details is None:
+        details = {}
 
-    logger = logging.getLogger("evoai")
-    logger.setLevel(logging.DEBUG)
+    message = f"[🧭 LOG] Evento: {event} | Detalles: {details}"
+    logger.log(level, message)
 
-    # Evitar duplicación de handlers si ya configurado
-    if not logger.handlers:
-        # Handler para archivo rotativo
-        file_handler = RotatingFileHandler(
-            MAIN_LOG, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
-        )
-        formatter = logging.Formatter(
-            "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-        # Handler para consola
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-
-
-def log_event(tipo, **kwargs):
-    """
-    Registra evento estructurado (formato JSON) en archivo separado por tipo.
-    """
-    os.makedirs(LOG_DIR, exist_ok=True)
-
-    timestamp = datetime.now().isoformat()
-    data = {
-        "timestamp": timestamp,
-        "tipo": tipo,
-        **kwargs
-    }
-
-    filename = os.path.join(LOG_DIR, f"{tipo}.log")
-    with open(filename, "a", encoding="utf-8") as f:
-        f.write(json.dumps(data, ensure_ascii=False) + "\n")
-
-
-def log(message: str, level: str = "INFO"):
-    """
-    Logger flexible con niveles.
-    Imprime por consola y guarda en archivo principal.
-    """
-    logger = logging.getLogger("evoai")
-
-    if not logger.handlers:
-        initialize_logger()
-
-    level = level.upper()
-    if level == "DEBUG":
-        logger.debug(message)
-    elif level == "INFO":
-        logger.info(message)
-    elif level == "WARNING":
-        logger.warning(message)
-    elif level == "ERROR":
-        logger.error(message)
-    elif level == "CRITICAL":
-        logger.critical(message)
-    else:
-        logger.info(f"[Unknown level: {level}] {message}")
+    if STDOUT_ENABLED:
+        print(message)

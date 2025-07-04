@@ -1,0 +1,123 @@
+  # daemon/evoai_context.py                                  # -*- coding: utf-8 -*-
+> """
+> Contexto operativo central de EvoAI.
+> Provee un marco simbólico, memoria, state y configuración,
+> con trazabilidad exhaustiva para auditoría y monitoreo.
+> Cumple estándares gubernamentales de seguridad y control.
+> """
+  
+! from typing import Optional, Dict, Any
+! import datetime
+! import logging
+  
+! from symbolic_ai.symbolic_learning_engine import SymbolicLearningEngine
+! from core.memory import AgentMemory
+! from core.config import Config
+! from core.state_manager import StateManager
+  
+! logger = logging.getLogger("EvoAI.Context")
+  
+  
+! class EvoAIContext:
+!     """
+!     Contexto global para la ejecución del agente EvoAI.
+  
+!     Componentes:
+!       - Motor simbólico (SymbolicLearningEngine o compatible)
+!       - Memoria (AgentMemory)
+!       - Estado (StateManager)
+!       - Configuración (Config)
+  
+!     Funcionalidades:
+!       - Actualización del contexto con validación y trazabilidad
+!       - Registro explícito de conceptos simbólicos
+!       - Exposition de state para auditoría
+!     """
+  
+!     def __init__(
+!         self,
+!         symbolic_engine: Optional[Any] = None,
+!         app_name: str = "EvoAI",
+!         version: str = "1.0.0"
+!     ):
+!         """
+!         Inicializa el contexto con parámetros claros para configuración.
+  
+!         Args:
+!             symbolic_engine: motor simbólico inyectable. Si es None, se usa SymbolicLearningEngine().
+!             app_name (str): Nombre de la aplicación para Config.
+!             version (str): Versión de la aplicación para Config.
+!         """
+!         self.symbolic: SymbolicLearningEngine = (
+!             symbolic_engine if symbolic_engine is not None
+!             else SymbolicLearningEngine()
+!         )
+!         self.memory: AgentMemory = AgentMemory()
+!         self.state: StateManager = StateManager()
+!         self.config: Config = Config(app_name=app_name, version=version)
+!         self.engine: Optional[Any] = None  # Motor asignable adicional
+  
+!         logger.info(f"🔧 EvoAIContext inicializado [{datetime.datetime.utcnow().isoformat()}]")
+  
+!     def update(self, observation: Dict[str, Any]) -> None:
+!         """
+!         Actualiza el contexto con una nueva observación.
+  
+!         Valida la estructura de la observación y registra evento.
+!         Propaga la observación a los componentes internos.
+!         """
+!         if not isinstance(observation, dict):
+!             logger.error(f"Observación inválida (no dict): {observation}")
+!             raise TypeError("La observación debe ser un diccionario válido.")
+  
+!         try:
+!             if self.symbolic:
+!                 self.symbolic.observe(observation)
+!             if self.state:
+!                 self.state.update(observation)
+!             logger.info(f"[Context] Observación registrada: {observation}")
+!         except Exception as ex:
+!             logger.exception(f"Error al actualizar contexto con la observación: {ex}")
+!             raise
+  
+!     def add_concept(self, concept: str, source: str = "unknown") -> None:
+!         """
+!         Agrega un concepto simbólico al motor simbólico.
+  
+!         Valida parámetros, registra evento y asegura trazabilidad.
+!         """
+!         if not isinstance(concept, str) or not concept.strip():
+!             logger.error(f"Concepto inválido para agregar: '{concept}'")
+!             raise ValueError("Concepto debe ser una cadena no vacía.")
+  
+!         if self.symbolic:
+!             try:
+!                 if hasattr(self.symbolic, "register_concept"):
+!                     self.symbolic.register_concept(concept.strip(), source)
+!                 else:
+!                     logger.warning("[Context] register_concept no implementado en SymbolicLearningEngine")
+!                 logger.info(f"[Context] Concepto agregado: '{concept}' (fuente: {source})")
+!             except Exception as ex:
+!                 logger.exception(f"Error al agregar concepto '{concept}': {ex}")
+!                 raise
+  
+!     def get_state_snapshot(self) -> Dict[str, Any]:
+!         """
+!         Obtiene una instantánea auditada del state actual del contexto.
+  
+!         Retorna:
+!             Dict con states relevantes para monitoreo y auditoría.
+!         """
+!         try:
+!             snapshot = {
+!                 "timestamp_utc": datetime.datetime.utcnow().isoformat(),
+!                 "symbolic_state": self.symbolic.export_state() if self.symbolic else None,
+!                 "memory_summary": self.memory.summary() if self.memory else None,
+!                 "state_status": self.state.status() if self.state and hasattr(self.state, "status") else None,
+!                 "config_version": getattr(self.config, "version", "unknown"),
+!             }
+!             logger.debug(f"[Context] Snapshot state: {snapshot}")
+!             return snapshot
+!         except Exception as ex:
+!             logger.exception(f"Error al obtener snapshot del state: {ex}")
+!             raise

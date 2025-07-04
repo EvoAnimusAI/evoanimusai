@@ -1,32 +1,74 @@
 # evoai/autoprogramming/symbolic_function.py
+"""SymbolicFunction: representación y utilidades de serialización para
+funciones simbólicas dentro del subsistema AutoProgramming de EvoAI.
 
-from typing import Optional, Dict
+El objetivo principal es ofrecer una estructura mínima, extensible y
+segura para almacenar código Python junto con metadatos que permitan
+trazabilidad, auditoría y persistencia.
+"""
+from __future__ import annotations
+
+from typing import Dict, Optional
 
 
 class SymbolicFunction:
+    """Representa una función simbólica estructurada.
+
+    Parameters
+    ----------
+    name : str
+        Identificador único y legible de la función.
+    code : str
+        Código fuente Python (texto completo) de la función.
+    metadata : dict | None
+        Metadatos arbitrarios (autores, versión, timestamps, hashes, etc.).
     """
-    Representa una función simbólica en formato estructurado con código fuente y metadatos.
-    """
+
+    __slots__ = ("name", "code", "metadata")
 
     def __init__(self, name: str, code: str, metadata: Optional[Dict] = None):
-        self.name = name
-        self.code = code
-        self.metadata = metadata or {}
+        self.name: str = name
+        self.code: str = code
+        self.metadata: Dict = metadata or {}
 
+    # ---------------------------------------------------------------------
+    # Serialización / Deserialización
+    # ---------------------------------------------------------------------
     def to_dict(self) -> Dict:
+        """Serializa la instancia a un diccionario JSON‑safe."""
         return {
             "name": self.name,
             "code": self.code,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @staticmethod
-    def from_dict(data: Dict) -> 'SymbolicFunction':
+    def from_dict(data: Dict) -> "SymbolicFunction":
+        """Crea una instancia a partir de un diccionario.
+
+        La función valida que existan al menos las claves obligatorias
+        ``name`` y ``code``. Si falta alguna, lanza ``ValueError``
+        con mensaje descriptivo para facilitar el debug y la migración
+        de datos legacy.
+        """
+        if not isinstance(data, dict):
+            raise ValueError("Input to SymbolicFunction.from_dict must be a dictionary.")
+
+        missing = {key for key in ("name", "code") if key not in data}
+        if missing:
+            raise ValueError(
+                f"Invalid SymbolicFunction data: missing required field(s): {', '.join(missing)}."
+            )
+
         return SymbolicFunction(
             name=data["name"],
             code=data["code"],
-            metadata=data.get("metadata", {})
+            metadata=data.get("metadata", {}),
         )
 
-    def __repr__(self):
-        return f"<SymbolicFunction name={self.name} metadata={self.metadata}>"
+    # ---------------------------------------------------------------------
+    # Representación
+    # ---------------------------------------------------------------------
+    def __repr__(self) -> str:  # pragma: no cover – representación no crítica
+        meta_info = f" metadata={self.metadata}" if self.metadata else ""
+        return f"<SymbolicFunction name={self.name}{meta_info}>"

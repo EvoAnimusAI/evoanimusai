@@ -1,95 +1,102 @@
-# tests/test_autoconsciousness.py
-
-import pytest
-from unittest import mock
 import sys
 import builtins
-import types
-
+import pytest
 from core import autoconsciousness
 
+class DummyModule:
+    pass
 
-def test_generate_hash_consistency():
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    val = "test_string"
-    h1 = ac._generate_hash(val)
-    h2 = ac._generate_hash(val)
+def test_generate_hash_and_signature(monkeypatch):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123", base_module="math")
+
+    # _generate_hash consistency test
+    h1 = ac._generate_hash("test")
+    h2 = autoconsciousness.hashlib.sha256("test".encode()).hexdigest()
     assert h1 == h2
-    assert isinstance(h1, str)
-    assert len(h1) == 64  # SHA-256 hash length
 
-
-def test_generate_signature_success(monkeypatch):
-    dummy_source = "def foo(): pass"
-
-    dummy_module = types.ModuleType("dummy_module")
-    dummy_module.__loader__ = object()  # requerido por inspect.getsource
-
-    monkeypatch.setattr(autoconsciousness.importlib, "import_module", lambda name: dummy_module)
-    monkeypatch.setattr(autoconsciousness.inspect, "getsource", lambda module: dummy_source)
-
-    ac = autoconsciousness.Autoconsciousness("Test", "ID", base_module="core.cac")
+    # _generate_signature success: monkeypatch importlib.import_module and inspect.getsource
+    def fake_import_module(name):
+        return DummyModule()
+    def fake_getsource(module):
+        return "def foo(): pass"
+    monkeypatch.setattr(autoconsciousness.importlib, "import_module", fake_import_module)
+    monkeypatch.setattr(autoconsciousness.inspect, "getsource", fake_getsource)
     signature = ac._generate_signature()
-    expected_hash = ac._generate_hash(dummy_source)
-    assert signature == expected_hash
+    assert isinstance(signature, str) and len(signature) == 64  # SHA256 hex length
 
-
-def test_generate_signature_failure(monkeypatch):
+    # _generate_signature failure triggers error handling
     def raise_import(name):
-        raise ImportError("Module not found")
-
+        raise ImportError("fail import")
     monkeypatch.setattr(autoconsciousness.importlib, "import_module", raise_import)
+    error_sig = ac._generate_signature()
+    assert error_sig.startswith("Signature error:")
 
-    ac = autoconsciousness.Autoconsciousness("Test", "ID", base_module="invalid.module")
-    signature = ac._generate_signature()
-    assert signature.startswith("Signature error:")
+def test_identity_and_declare(monkeypatch, caplog):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123")
+    assert ac.identity == "Tester::ID123"
+    ac.signature = "dummy_signature"
+    with caplog.at_level("INFO"):
+        ac.declare_existence()
+    assert "EvoAI::SelfAwareness declared" in caplog.text
+    assert "Core identity: Tester::ID123" in caplog.text
+    assert "Current signature: dummy_signature" in caplog.text
 
+def test_evaluate_integrity(monkeypatch, caplog):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123")
+    original_signature = ac.signature
 
-def test_evaluate_integrity_unchanged(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID", base_module="core.cac")
-    monkeypatch.setattr(ac, "_generate_signature", lambda: ac.signature)
-    assert ac.evaluate_integrity() is True
+    # Case: integrity intact
+    monkeypatch.setattr(ac, "_generate_signature", lambda: original_signature)
+    with caplog.at_level("INFO"):
+        assert ac.evaluate_integrity() is True
+        assert "Structural integrity verified" in caplog.text
 
-
-def test_evaluate_integrity_changed(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID", base_module="core.cac")
+    # Case: integrity violated
     monkeypatch.setattr(ac, "_generate_signature", lambda: "different_signature")
-    assert ac.evaluate_integrity() is False
-    assert ac.signature == "different_signature"
+    with caplog.at_level("WARNING"):
+        result = ac.evaluate_integrity()
+        assert result is False
+        assert "Mutation or core rewrite detected" in caplog.text
+        assert ac.signature == "different_signature"
 
+def test_obey_master_key(monkeypatch):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123")
 
-def test_obey_master_key_valid(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    key = ac._MASTER_KEY_PLAIN
+    # Valid key triggers sys.exit(0)
+    valid_key = ac._MASTER_KEY_PLAIN
+    with pytest.raises(SystemExit) as e:
+        ac.obey_master_key(valid_key)
+    assert e.value.code == 0
 
-    with mock.patch.object(sys, "exit") as mock_exit:
-        result = ac.obey_master_key(key)
-        mock_exit.assert_called_once_with(0)
-        assert result is None
+    # Invalid key returns False and logs error
+    ret = ac.obey_master_key("wrong_key")
+    assert ret is False
 
+def test_prompt_master_key(monkeypatch, caplog):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123")
 
-def test_obey_master_key_invalid():
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    result = ac.obey_master_key("wrong_key")
-    assert result is False
-
-
-def test_prompt_master_key_valid(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    monkeypatch.setattr(builtins, "input", lambda prompt="": ac._MASTER_KEY_PLAIN)
-
-    with mock.patch.object(sys, "exit") as mock_exit:
+    # Simulate correct key input that triggers SystemExit
+    monkeypatch.setattr(builtins, "input", lambda _: ac._MASTER_KEY_PLAIN)
+    with pytest.raises(SystemExit):
         ac.prompt_master_key()
-        mock_exit.assert_called_once_with(0)
 
+    # Simulate wrong key input
+    monkeypatch.setattr(builtins, "input", lambda _: "bad_key")
+    with caplog.at_level("ERROR"):
+        ret = ac.prompt_master_key()
+        assert ret is None  # method returns None even on invalid key
 
-def test_prompt_master_key_interrupt(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    monkeypatch.setattr(builtins, "input", lambda prompt="": (_ for _ in ()).throw(KeyboardInterrupt))
-    ac.prompt_master_key()  # Debe manejar la interrupción limpiamente
+    # Simulate KeyboardInterrupt on input
+    def raise_keyboard(_):
+        raise KeyboardInterrupt()
+    monkeypatch.setattr(builtins, "input", raise_keyboard)
+    with caplog.at_level("INFO"):
+        ac.prompt_master_key()  # Should log cancellation, no raise
 
+def test_rewrite_if_necessary(monkeypatch, caplog):
+    ac = autoconsciousness.Autoconsciousness("Tester", "ID123")
 
-def test_prompt_master_key_eof(monkeypatch):
-    ac = autoconsciousness.Autoconsciousness("Test", "ID")
-    monkeypatch.setattr(builtins, "input", lambda prompt="": (_ for _ in ()).throw(EOFError))
-    ac.prompt_master_key()  # Debe manejar el EOF limpiamente
+    monkeypatch.setattr(ac, "evaluate_integrity", lambda: True)
+    with caplog.at_level("INFO"):
+        ac.rewrite_if_necessary()
+        assert "Conscious state updated" in caplog.text

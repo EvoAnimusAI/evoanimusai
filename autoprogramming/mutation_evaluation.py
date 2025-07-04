@@ -16,7 +16,10 @@ if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r") as f:
         raw_memory = json.load(f)
         memory = {
-            "functions": [SymbolicFunction.from_dict(d) for d in raw_memory.get("functions", [])]
+            "functions": [
+                SymbolicFunction.from_dict(d) for d in raw_memory.get("functions", [])
+                if isinstance(d, dict) and "name" in d and "code" in d
+            ]
         }
 else:
     memory = {"functions": []}

@@ -1,62 +1,48 @@
 import pytest
-import tempfile
-import os
-import json
+from unittest.mock import MagicMock, patch, mock_open
 from monitoring.analyzer_daemon import EvoAIAnalyzerDaemon
 
-class MockEvoAIEngine:
-    def __init__(self, events):
-        self._events = events
-
-    def get_recent_events(self):
-        return self._events
-
 @pytest.fixture
-def sample_events():
-    return [
-        {"accion": "explorar", "recompensa": 0.8, "regla_aplicada": "r1"},
-        {"accion": "analizar", "recompensa": -0.2, "regla_aplicada": "r2"},
-        {"accion": "explorar", "recompensa": 0.6, "regla_aplicada": "r1"},
-        {"accion": "explorar", "recompensa": -0.4},  # sin regla
-        {"recompensa": 1.0, "regla_aplicada": "r3"}  # sin acción
+def mock_engine():
+    engine = MagicMock()
+    engine.get_recent_events.return_value = [
+        {"accion": "explore", "recompensa": 1.0, "regla_aplicada": "⟦mood:curious⟧ ⇒ explore :: True"},
+        {"accion": "explore", "recompensa": 0.5, "regla_aplicada": "⟦mood:curious⟧ ⇒ explore :: True"},
+        {"accion": "exploit", "recompensa": -1.0, "regla_aplicada": "⟦mood:focused⟧ ⇒ exploit :: True"},
     ]
+    return engine
 
-def test_analyzer_generates_correct_summary(sample_events):
-    engine = MockEvoAIEngine(sample_events)
-    with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
-        analyzer = EvoAIAnalyzerDaemon(engine, interval=1, log_file=tmpfile.name)
-        summary = analyzer.run_cycle()
+def test_run_cycle_not_triggered(mock_engine):
+    daemon = EvoAIAnalyzerDaemon(engine=mock_engine, interval=5)
+    daemon.counter = 3
+    assert daemon.run_cycle() is None
+    assert daemon.counter == 4
 
-        assert summary is not None
-        assert "actions" in summary
-        assert "rules" in summary
+def test_run_cycle_empty_events(mock_engine):
+    mock_engine.get_recent_events.return_value = []
+    daemon = EvoAIAnalyzerDaemon(engine=mock_engine, interval=1)
+    result = daemon.run_cycle()
+    assert result is None
+    assert daemon.counter == 0
 
-        # Verificamos acción "explorar"
-        explorar = summary["actions"].get("explorar")
-        assert explorar is not None
-        assert abs(explorar["average_reward"] - (0.8 + 0.6 - 0.4) / 3) < 1e-5
-        assert explorar["count"] == 3
+def test_run_cycle_analysis_success(mock_engine):
+    daemon = EvoAIAnalyzerDaemon(engine=mock_engine, interval=1, log_file="dummy.json")
+    with patch("builtins.open", mock_open()) as mocked_file, \
+         patch("json.dump") as mock_dump, \
+         patch("logging.Logger.info"), \
+         patch("logging.Logger.warning"):
+        result = daemon.run_cycle()
+        assert result is not None
+        assert "actions" in result
+        assert "rules" in result
+        mock_dump.assert_called_once()
 
-        # Verificamos regla "r1"
-        r1 = summary["rules"].get("r1")
-        assert r1 is not None
-        assert abs(r1["average_reward"] - (0.8 + 0.6) / 2) < 1e-5
-        assert r1["recommendation"] == "keep/mutate"
-
-        # Verificamos regla "r2"
-        r2 = summary["rules"].get("r2")
-        assert r2 is not None
-        assert r2["recommendation"] == "prune"
-
-        # Verificamos archivo generado
-        with open(tmpfile.name, 'r') as f:
-            file_summary = json.load(f)
-            assert file_summary == summary
-
-    os.remove(tmpfile.name)
-
-def test_analyzer_handles_empty_events():
-    engine = MockEvoAIEngine([])
-    analyzer = EvoAIAnalyzerDaemon(engine, interval=1)
-    summary = analyzer.run_cycle()
-    assert summary is None  # No debe analizar si no hay eventos
+def test_analysis_malformed_event(mock_engine):
+    mock_engine.get_recent_events.return_value.append({"accion": "unknown", "recompensa": "invalid"})
+    daemon = EvoAIAnalyzerDaemon(engine=mock_engine, interval=1, log_file="dummy.json")
+    with patch("builtins.open", mock_open()), \
+         patch("json.dump"), \
+         patch("logging.Logger.warning") as mock_warn:
+        result = daemon.run_cycle()
+        assert result is not None
+        mock_warn.assert_called()

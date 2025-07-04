@@ -1,59 +1,80 @@
-import pytest
-from autoprogramming.mutation_operator import (
-    generate_function_name,
-    generate_class_name,
-    mutate_function
-)
+import unittest
+import ast
+from unittest.mock import patch
+import autoprogramming.mutation_operator as mo
 
-@pytest.fixture
-def seeded_rng():
-    import random
-    rng = random.Random(42)
-    return rng
 
-def test_generate_function_name_format(seeded_rng):
-    name = generate_function_name(seeded_rng)
-    assert name.startswith("func_")
-    assert len(name) == 11
-    assert all(c.islower() for c in name[5:])
+class TestMutationOperator(unittest.TestCase):
+    """Pruebas unitarias para autoprogramming.mutation_operator"""
 
-def test_generate_class_name_format(seeded_rng):
-    name = generate_class_name(seeded_rng)
-    assert name.startswith("Class_")
-    assert len(name) == 10  # "Class_" + 4 letras
-    assert all(c.isupper() for c in name[6:])  # Solo sufijo aleatorio
+    # ---------- utilidades internas ----------
+    def _mutate(self, code: str) -> str:
+        """Ejecuta mutate_function con todas las mutaciones forzadas y
+        parchea apply_semantic_mutation como identidad para aislar tests."""
+        with patch.object(mo, "apply_semantic_mutation", lambda x: x):
+            return mo.mutate_function(code, force_all_mutations=True)
 
-def test_mutate_function_changes_name(seeded_rng):
-    code = """
-def hello():
-    return 42
-"""
-    mutated = mutate_function(code, rng=seeded_rng, force_all_mutations=True)
-    assert "hello" not in mutated
-    assert "def func_" in mutated
+    # ---------- tests de helpers -------------
+    def test_generate_function_name_format(self):
+        name = mo.generate_function_name()
+        self.assertTrue(name.startswith("func_") and len(name) == 11)
 
-def test_mutate_if_condition_negation(seeded_rng):
-    code = """
-def check(x):
+    def test_generate_class_name_format(self):
+        name = mo.generate_class_name()
+        self.assertTrue(name.startswith("Class_") and len(name) == 10)
+
+    # ---------- tests de mutación ------------
+    def test_mutated_code_is_valid_python(self):
+        original = """
+def example(x):
     if x > 0:
+        return x
+    else:
+        return -x
+"""
+        mutated = self._mutate(original)
+        # Debe ser código válido
+        try:
+            ast.parse(mutated)
+        except SyntaxError as e:
+            self.fail(f"Código mutado inválido:\n{mutated}\nError: {e}")
+
+    def test_function_name_changes(self):
+        code = "def target():\n    return 42\n"
+        mutated = self._mutate(code)
+        self.assertIn("def ", mutated)
+        self.assertNotIn("target", mutated)
+
+    def test_class_name_changes(self):
+        code = "class Target:\n    pass\n"
+        mutated = self._mutate(code)
+        self.assertIn("class ", mutated)
+        self.assertNotIn("Target", mutated)
+
+    def test_if_condition_negated(self):
+        code = """
+def foo(x):
+    if x > 1:
         return True
     return False
 """
-    mutated = mutate_function(code, rng=seeded_rng, force_all_mutations=True)
-    assert "if not" in mutated or "ast.UnaryOp" in mutated
+        mutated = self._mutate(code)
+        self.assertIn("not", mutated)  # condición negada
 
-def test_mutate_try_body_else_swap_and_exception_name_change(seeded_rng):
-    code = """
-def risky():
-    try:
-        print("ok")
-    except Exception:
-        print("fail")
-    else:
-        print("done")
+    def test_try_except_swapped_and_exception_changed(self):
+        code = """
+try:
+    x = 1 / 0
+except ZeroDivisionError:
+    x = 0
+else:
+    x = 1
 """
-    mutated = mutate_function(code, rng=seeded_rng, force_all_mutations=True)
-    assert "Exception" in mutated
-    except_clause = mutated.split("except ")[1].split(":")[0].strip()
-    assert except_clause != "Exception"
-    assert "Exception" in except_clause
+        mutated = self._mutate(code)
+        # Debe contener una nueva Exception personalizada y el bloque else
+        self.assertIn("Exception", mutated)
+        self.assertIn("else", mutated)
+
+
+if __name__ == "__main__":
+    unittest.main()

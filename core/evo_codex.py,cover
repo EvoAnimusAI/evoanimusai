@@ -1,0 +1,79 @@
+  # core/evo_codex.py
+  
+! import ast
+! import difflib
+! import os
+! from datetime import datetime
+! from symbolic_ai.symbolic_context import symbolic_context
+! from core.network_access import NetworkAccess  # Importación agregada
+  
+! class EvoCodex:
+!     def __init__(self, root_path="."):
+!         self.root_path = root_path
+!         self.network = NetworkAccess(verbose=False)  # Instancia de NetworkAccess
+  
+!     def analizar_codigo(self, file_path):
+!         try:
+!             with open(file_path, "r", encoding="utf-8") as f:
+!                 source = f.read()
+!             tree = ast.parse(source)
+!             return tree, source
+!         except SyntaxError as e:
+!             return None, f"SyntaxError: {e}"
+  
+!     def sugerir_reescritura(self, source_code):
+!         lines = source_code.splitlines()
+!         rewritten_lines = []
+!         for line in lines:
+!             if "# TODO" in line:
+!                 comment = "  # 🧠 Improved based on symbolic reasoning"
+!                 newline = line.replace("# TODO", comment)
+!                 rewritten_lines.append(newline)
+!             else:
+!                 rewritten_lines.append(line)
+!         return "\n".join(rewritten_lines)
+  
+!     def comparar_y_guardar(self, original_code, modified_code, file_path):
+!         if original_code.strip() == modified_code.strip():
+!             return False, None
+  
+!         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+!         log_dir = os.path.join(self.root_path, "logs", "evo_codex")
+!         os.makedirs(log_dir, exist_ok=True)
+!         log_path = os.path.join(log_dir, f"{os.path.basename(file_path)}.{timestamp}.diff.txt")
+  
+!         diff = difflib.unified_diff(
+!             original_code.splitlines(),
+!             modified_code.splitlines(),
+!             fromfile="original",
+!             tofile="modified",
+!             lineterm=""
+!         )
+!         diff_text = "\n".join(diff)
+!         with open(log_path, "w", encoding="utf-8") as f:
+!             f.write(diff_text)
+  
+!         with open(file_path, "w", encoding="utf-8") as f:
+!             f.write(modified_code)
+  
+!         return True, log_path
+  
+!     def execute_auto_rewrite(self, file_path):
+!         tree, source = self.analizar_codigo(file_path)
+!         if tree is None:
+!             symbolic_context.register_metacognition(f"Syntax error detected in {file_path}")
+!             return False, None
+  
+!         rewritten = self.sugerir_reescritura(source)
+!         changed, log_path = self.comparar_y_guardar(source, rewritten, file_path)
+  
+!         if changed:
+!             symbolic_context.register_metacognition(
+!                 f"Symbolic auto-rewrite applied to {file_path}, changes saved at {log_path}"
+!             )
+!         else:
+!             symbolic_context.register_metacognition(
+!                 f"Symbolic evaluation completed on {file_path}, no changes necessary"
+!             )
+  
+!         return changed, log_path

@@ -1,33 +1,21 @@
-# tests/test_evoai_initializer_security.py
-# -*- coding: utf-8 -*-
-"""
-Pruebas unitarias para evoai_initializer_security.py.
-Cobertura completa de seguridad en lectura de claves desde entorno seguro.
-"""
-
 import os
 import pytest
-from daemon.evoai_initializer_security import load_secure_key
+from daemon import evoai_initializer_security
+
 
 def test_load_secure_key_success(monkeypatch):
-    valid_key = "A_SUPER_SECURE_DAEMON_KEY_12345"
-    monkeypatch.setenv("EVOAI_DAEMON_KEY", valid_key)
-
-    result = load_secure_key()
-    assert result == valid_key
+    monkeypatch.setenv("EVOAI_DAEMON_KEY", "A591243133418571088300454z")
+    key = evoai_initializer_security.load_secure_key()
+    assert key == "A591243133418571088300454z"
 
 
 def test_load_secure_key_missing(monkeypatch):
     monkeypatch.delenv("EVOAI_DAEMON_KEY", raising=False)
-
-    with pytest.raises(EnvironmentError) as exc_info:
-        load_secure_key()
-    assert "no configurada" in str(exc_info.value)
+    with pytest.raises(EnvironmentError, match="no configurada"):
+        evoai_initializer_security.load_secure_key()
 
 
 def test_load_secure_key_too_short(monkeypatch):
     monkeypatch.setenv("EVOAI_DAEMON_KEY", "short-key")
-
-    with pytest.raises(ValueError) as exc_info:
-        load_secure_key()
-    assert "demasiado corta" in str(exc_info.value)
+    with pytest.raises(ValueError, match="demasiado corta"):
+        evoai_initializer_security.load_secure_key()

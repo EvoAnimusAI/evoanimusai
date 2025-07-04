@@ -1,0 +1,27 @@
+import logging
+from utils.logging import log_event
+
+def test_log_event_info_level(caplog):
+    with caplog.at_level(logging.INFO):
+        log_event("test_event", {"key": "value"})
+    assert any("Evento: test_event" in msg for msg in caplog.text.splitlines())
+    assert "Detalles: {'key': 'value'}" in caplog.text
+
+def test_log_event_str_level(caplog):
+    with caplog.at_level(logging.WARNING):
+        log_event("test_warning", {"warning": True}, level="WARNING")
+    assert "Evento: test_warning" in caplog.text
+    assert "Detalles: {'warning': True}" in caplog.text
+    assert "WARNING" in caplog.text
+
+def test_log_event_default_details(caplog):
+    with caplog.at_level(logging.INFO):
+        log_event("event_without_details")
+    assert "Evento: event_without_details" in caplog.text
+    assert "Detalles: {}" in caplog.text
+
+def test_log_event_invalid_str_level_fallback(caplog):
+    with caplog.at_level(logging.INFO):
+        log_event("event_invalid_level", {"test": True}, level="INVALID")
+    assert "Evento: event_invalid_level" in caplog.text
+    assert "Detalles: {'test': True}" in caplog.text

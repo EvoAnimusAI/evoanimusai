@@ -35,11 +35,11 @@ except ImportError as e:
     logger.warning(f"Optional module 'hypermutation' could not be imported: {e}")
     HypermutationEngine = None
 
-try:
-    from .function_evaluator import evaluate_expression
-except ImportError as e:
-    logger.warning(f"Optional module 'function_evaluator' could not be imported: {e}")
-    evaluate_expression = None
+# Se elimina la importación errónea y no existente de evaluate_expression
+# from .function_evaluator import evaluate_expression
+
+# No se declara evaluate_expression para evitar errores futuros
+# evaluate_expression = None
 
 __all__ = [
     "SymbolicExpression",
@@ -51,5 +51,5 @@ __all__ = [
     "SymbolicContext",
     "WebFilter",
     "HypermutationEngine",
-    "evaluate_expression",
+    # Se elimina 'evaluate_expression' del listado público
 ]

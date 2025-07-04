@@ -1,0 +1,107 @@
+  # core/self_diagnostics.py
+  # -*- coding: utf-8 -*-
+> """
+> Módulo de Diagnóstico y Verificación de Integridad del sistema EvoAnimusAI.
+> Nivel: Militar / Gubernamental / Ultra-secreto
+  
+> Responsabilidad:
+> - Validar state crítico y disponibilidad de subsistemas clave antes de iniciar cada ciclo.
+> - Verificar integridad del contexto simbólico, configuración, rutas y seguridad.
+> - Registrar fallos críticos y bloquear operación en caso de corrupción o inconsistencias.
+> """
+  
+! import logging
+! import os
+! from typing import Dict, Any, Optional
+! from core.config import Config
+  
+! logger = logging.getLogger("EvoAI.Diagnostics")
+  
+! class SelfDiagnostics:
+!     REQUIRED_COMPONENTS = ["context", "agent", "engine", "decision", "executor"]
+  
+!     def __init__(self, components: Optional[Dict[str, Any]] = None):
+!         """
+!         Inicializa el diagnóstico con los componentes del sistema.
+!         :param components: Diccionario con referencias a subsistemas críticos.
+!         """
+!         self.components = components or {}
+  
+!     def run_preflight_check(self, daemon_key: Optional[str] = None) -> bool:
+!         """
+!         Ejecuta chequeos críticos previos al ciclo de ejecución.
+!         :param daemon_key: Clave de seguridad para validar permisos.
+!         :return: True si la integridad es correcta, False en caso de fallo crítico.
+!         """
+!         logger.info("[🩺] Iniciando diagnóstico de integridad previo al ciclo...")
+  
+!         try:
+              # Validación de componentes críticos
+!             for key in self.REQUIRED_COMPONENTS:
+!                 if key not in self.components:
+!                     logger.critical(f"[🛑] Componente ausente: '{key}'. Abortando operación.")
+!                     return False
+!                 if self.components[key] is None:
+!                     logger.critical(f"[🛑] Componente nulo: '{key}'. Abortando operación.")
+!                     return False
+  
+              # Validación del contexto simbólico
+!             context = self.components.get("context")
+!             if context is None:
+!                 logger.critical("[🧠] Contexto simbólico no definido.")
+!                 return False
+!             if not hasattr(context, "state") or not isinstance(context.state, dict):
+!                 logger.critical("[🧠] Contexto simbólico inválido o corrupto.")
+!                 return False
+  
+              # Validación de clave de seguridad (mínimo 12 caracteres)
+!             if not daemon_key or len(daemon_key.strip()) < 12:
+!                 logger.critical("[🔐] Clave de seguridad inválida o ausente.")
+!                 return False
+  
+              # Validación de rutas críticas del sistema
+!             config = Config.get_instance()
+!             critical_paths = [
+!                 config.symbolic_memory_path,
+!                 config.mutated_functions_path,
+!                 config.logs_path,
+!             ]
+!             for path in critical_paths:
+!                 if not os.path.exists(path):
+!                     logger.critical(f"[📂] Ruta crítica no encontrada: {path}")
+!                     return False
+  
+!             logger.info("[✅] Diagnóstico completo: Integridad del sistema validada.")
+!             return True
+  
+!         except Exception as ex:
+!             logger.error(f"[💥] Error crítico durante diagnóstico de integridad: {ex}")
+!             return False
+  
+  
+! def run_integrity_diagnostics(context: Any) -> bool:
+!     """
+!     Función auxiliar para chequeo rápido de integridad.
+!     Puede usarse en casos donde no se dispone de todos los componentes.
+!     :param context: Objeto contexto simbólico.
+!     :return: True si pasa chequeos básicos, False si falla.
+!     """
+!     logger.info("[SelfDiagnostics] Ejecutando diagnóstico básico de integridad...")
+  
+!     try:
+!         if context is None:
+!             logger.error("[SelfDiagnostics] Contexto no definido.")
+!             return False
+  
+!         if not hasattr(context, "state") or not isinstance(context.state, dict):
+!             logger.error("[SelfDiagnostics] Estado del contexto inválido o ausente.")
+!             return False
+  
+          # Aquí podrían añadirse chequeos adicionales básicos...
+  
+!         logger.info("[SelfDiagnostics] Diagnóstico básico exitoso.")
+!         return True
+  
+!     except Exception as e:
+!         logger.error(f"[SelfDiagnostics] Error crítico durante diagnóstico: {e}")
+!         return False

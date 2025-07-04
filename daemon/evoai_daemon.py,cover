@@ -1,0 +1,65 @@
+  # daemon/evoai_daemon.py
+  # -*- coding: utf-8 -*-
+> """
+> EvoAI Daemon Principal — Nivel gubernamental
+> Punto de entrada del sistema simbólico-cognitivo EvoAI.
+> """
+  
+! import argparse
+! import logging
+! import os
+! from dotenv import load_dotenv  # ← Carga de variables seguras desde .env
+! load_dotenv()                   # ← Se ejecuta antes de cualquier importación de claves
+  
+! from daemon.evoai_initializer_core import initialize_core_components
+! from daemon.evoai_cycle_executor import run_cycle_loop
+! from daemon.evoai_initializer_security import load_secure_key
+! from daemon.evoai_shutdown_manager import setup_signal_handlers  # ← 🔐 Manejo de apagado
+! from core.self_diagnostics import SelfDiagnostics  # ← 🩺 Diagnóstico militar
+  
+  # Configuración del logger raíz
+! logging.basicConfig(
+!     level=logging.INFO,
+!     format="%(asctime)s [%(levelname)s] :: %(message)s",
+!     handlers=[
+!         logging.FileHandler("logs/evoai_super_daemon.log"),
+!         logging.StreamHandler()
+!     ]
+! )
+! logger = logging.getLogger("EvoAI.Daemon")
+  
+  # Llave maestra por defecto (usada solo si no hay variable de entorno y no se pasa --key)
+! DAEMON_KEY_FALLBACK = "A591243133418571088300454z"
+  
+! def main(daemon_key: str, test_mode: bool = False):
+      # Inicializa capturadores de señales OS
+!     setup_signal_handlers()  # ← 🔒 Detención segura habilitada
+  
+      # Comparación estricta de clave para acceso
+!     if daemon_key != DAEMON_KEY_FALLBACK and daemon_key != load_secure_key():
+!         logger.critical("🔒 Clave inválida. Acceso denegado.")
+!         return
+  
+!     logger.info("🔑 Clave aceptada. Iniciando EvoAI...")
+!     components = initialize_core_components()
+  
+      # Diagnóstico de integridad antes de ejecutar
+!     diagnostics = SelfDiagnostics(components)
+!     if not diagnostics.run_preflight_check(daemon_key):
+!         logger.critical("🚨 Diagnóstico fallido. Abortando daemon.")
+!         return
+  
+      # Ejecuta el bucle de ciclos pasando el flag test_mode
+!     run_cycle_loop(test_mode=test_mode)
+  
+! if __name__ == "__main__":
+!     parser = argparse.ArgumentParser(description="EvoAI Super Symbolic Daemon")
+!     parser.add_argument("--key", required=False, help="Clave de acceso para el daemon")
+!     parser.add_argument("--test", action="store_true", help="Ejecutar en modo prueba (test_mode)")
+  
+!     args = parser.parse_args()
+  
+      # Prioriza el argumento --key, si no se pasa, intenta cargar desde variable segura
+!     daemon_key = args.key if args.key else load_secure_key()
+  
+!     main(daemon_key, test_mode=args.test)

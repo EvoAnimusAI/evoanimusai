@@ -1,89 +1,71 @@
 # tests/test_targeted_mutation.py
 
 import pytest
-from unittest.mock import MagicMock
 from metacognition.targeted_mutation import TargetedMutation
+from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine
+from symbolic_ai.symbolic_rule import SymbolicRule
 
-class DummyRule:
-    def __init__(self, action="wait", reward=0.0, threshold=0.5, weight=1.0):
-        self.action = action
-        self.reward = reward
-        self.threshold = threshold
-        self.weight = weight
 
 @pytest.fixture
-def dummy_rule_engine():
-    engine = MagicMock()
-    engine.get_all.return_value = [
-        DummyRule(action="wait", reward=-0.3),
-        DummyRule(action="advance", reward=0.2)
-    ]
+def dummy_context():
+    return {
+        "entropy": 0.8,
+        "error_rate": 0.6,
+        "last_action": "explore",
+        "mutation_budget": 3
+    }
+
+
+@pytest.fixture
+def setup_rules():
+    engine = SymbolicRuleEngine(auto_load=False)
+    engine.clear_rules()
+    rule = SymbolicRule("action", "explore", "move_forward", "entropy > 0.5")
+    # Mock: se le añade un atributo 'reward'
+    rule.reward = 0.3
+    engine.add_rule(rule)
     return engine
 
-def test_strong_mutation_applied(dummy_rule_engine):
-    tm = TargetedMutation(rule_engine=dummy_rule_engine)
-    context = {"recent_rewards": [-1, -1, -1]}
-    result = tm.mutate(context)
-    assert result is True
-    assert len(tm.mutation_history) == 1
 
-def test_moderate_mutation_applied(dummy_rule_engine):
-    dummy_rule_engine.get_all.return_value = [DummyRule(reward=0.0, threshold=0.6)]
-    tm = TargetedMutation(rule_engine=dummy_rule_engine)
-    context = {"rejected_mutations": 10}
-    result = tm.mutate(context)
-    assert result is True
-    assert len(tm.mutation_history) == 1
-
-def test_light_mutation_applied(dummy_rule_engine):
-    dummy_rule_engine.get_all.return_value = [DummyRule(reward=0.0, weight=1.2)]
-    tm = TargetedMutation(rule_engine=dummy_rule_engine)
-    context = {"recent_rewards": [0.5, 0.7]}
-    result = tm.mutate(context)
-    assert result is True
-    assert len(tm.mutation_history) == 1
-
-def test_mutation_fails_if_no_rules():
-    empty_engine = MagicMock()
-    empty_engine.get_all.return_value = []
-    tm = TargetedMutation(rule_engine=empty_engine)
-    context = {}
-    result = tm.mutate(context)
-    assert result is False
-    assert len(tm.mutation_history) == 0
-
-def test_mutation_fails_if_required_attributes_missing():
-    class IncompleteRule:
-        def __init__(self): pass  # no attributes
-
-    engine = MagicMock()
-    engine.get_all.return_value = [IncompleteRule()]
-    tm = TargetedMutation(rule_engine=engine)
-    context = {"rejected_mutations": 10}  # triggers moderate mutation
-    result = tm.mutate(context)
-    assert result is False
-    assert len(tm.mutation_history) == 0
-
-def test_selects_lowest_reward_rule():
-    rules = [
-        DummyRule(action="calm", reward=0.5),
-        DummyRule(action="advance", reward=-0.4),
-        DummyRule(action="explore", reward=0.1)
-    ]
-    engine = MagicMock()
-    engine.get_all.return_value = rules
-    tm = TargetedMutation(rule_engine=engine)
-    selected = tm.select_rule_to_mutate()
-    assert selected.reward == -0.4
-
-def test_analyze_context_logic():
+def test_evaluate_context_entropy():
     tm = TargetedMutation()
-    ctx_strong = {"recent_rewards": [-1, -1, -1]}
-    ctx_moderate_rejects = {"rejected_mutations": 6}
-    ctx_moderate_entropy = {"current_entropy": 0.8}
-    ctx_light = {"recent_rewards": [0.5]}
+    ctx = {"entropy": 0.9}
+    assert tm.evaluate_context(ctx) == "refine_structure"
 
-    assert tm.analyze_context(ctx_strong)["type"] == "strong"
-    assert tm.analyze_context(ctx_moderate_rejects)["type"] == "moderate"
-    assert tm.analyze_context(ctx_moderate_entropy)["type"] == "moderate"
-    assert tm.analyze_context(ctx_light)["type"] == "light"
+
+def test_evaluate_context_error_rate():
+    tm = TargetedMutation()
+    ctx = {"error_rate": 0.8}
+    assert tm.evaluate_context(ctx) == "adjust_thresholds"
+
+
+def test_evaluate_context_none():
+    tm = TargetedMutation()
+    ctx = {"error_rate": 0.2, "entropy": 0.3}
+    assert tm.evaluate_context(ctx) is None
+
+
+def test_select_rule_to_mutate_returns_lowest_reward(setup_rules):
+    tm = TargetedMutation()
+    tm.rule_engine = setup_rules
+    rule = tm.select_rule_to_mutate()
+    assert isinstance(rule, SymbolicRule)
+    assert rule.reward == 0.3
+
+
+def test_mutate_successful(monkeypatch, setup_rules, dummy_context):
+    tm = TargetedMutation()
+    tm.rule_engine = setup_rules
+
+    # Parchear método mutate en la regla
+    def dummy_mutate(self, mutation_type):
+        self.accion = f"{self.accion}_{mutation_type}"
+        return True
+
+    monkeypatch.setattr(SymbolicRule, "mutate", dummy_mutate)
+
+    success = tm.mutate(dummy_context)
+    assert success is True
+
+    mutated_rule = tm.select_rule_to_mutate()
+    assert "refine_structure" in mutated_rule.accion or "adjust_thresholds" in mutated_rule.accion

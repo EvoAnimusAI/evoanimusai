@@ -1,0 +1,1 @@
+Función mutada generada a partir de conceptos simbólicos recientes: <MagicMock name='EvoContext().symbolic.get_recent_concepts()' id='512829707344'>

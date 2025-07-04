@@ -1,0 +1,74 @@
+# -*- coding: utf-8 -*-
+"""
+Certificación Automática de Comportamiento (CAC) para EvoAnimusAI.
+
+Detecta ciclos de decisión degenerativos, acciones repetitivas o estancamientos
+conductuales, y aplica penalizaciones o correcciones simbólicas.
+
+Nivel: Militar / Científico / Gubernamental
+"""
+
+import logging
+from collections import Counter
+from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
+
+class BehaviorCertifier:
+    def __init__(self, max_loop_threshold: int = 5, repetition_window: int = 10):
+        """
+        Inicializa el certificador con parámetros de sensibilidad.
+
+        :param max_loop_threshold: Número máximo de repeticiones toleradas.
+        :param repetition_window: Tamaño de la ventana del historial analizado.
+        """
+        self.max_loop_threshold = max_loop_threshold
+        self.repetition_window = repetition_window
+
+    def detect_behavior_loop(self, history: List[str]) -> bool:
+        """
+        Detecta ciclos o repeticiones peligrosas en la ventana de historial.
+
+        :param history: Lista de acciones anteriores (últimos N pasos).
+        :return: True si se detecta un bucle conductual, False en caso contrario.
+        """
+        if len(history) < self.repetition_window:
+            return False
+
+        window = history[-self.repetition_window:]
+        freq = Counter(window)
+        most_common_action, count = freq.most_common(1)[0]
+        if count >= self.max_loop_threshold:
+            logger.warning(f"[CAC] Detección de ciclo de comportamiento: '{most_common_action}' repetido {count} veces.")
+            return True
+        return False
+
+    def apply_certification(self, decision: Dict[str, Any], history: List[str]) -> Dict[str, Any]:
+        """
+        Aplica penalizaciones simbólicas si se detectan patrones degenerativos.
+
+        :param decision: Diccionario con la decisión a evaluar y certificar.
+        :param history: Historial simbólico de decisiones recientes.
+        :return: Decisión posiblemente modificada.
+        """
+        if not decision or "action" not in decision:
+            return decision  # Decisión inválida o vacía
+
+        if self.detect_behavior_loop(history):
+            # Penaliza la prioridad simbólica o redirige la action
+            original_priority = decision.get("priority", 0)
+            decision["priority"] = max(original_priority - 1, -10)
+            decision["certified"] = False
+            logger.warning(f"[CAC] Acción '{decision['action']}' penalizada por comportamiento degenerativo.")
+        else:
+            decision["certified"] = True
+        return decision
+
+    def log_behavioral_anomaly(self, step: int, context: Any) -> None:
+        """
+        Registra en el log eventos de comportamiento inestable o degenerativo.
+
+        :param step: Número del paso actual.
+        :param context: Contexto simbólico y de ejecución.
+        """
+        logger.error(f"[CAC] Anomalía conductual detectada en paso {step}. Contexto: {getattr(context, 'state', {})}")

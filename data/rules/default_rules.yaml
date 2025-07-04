@@ -1,0 +1,5 @@
+- id: rule_example_1
+  condition: "context.get('input') == 'hello'"
+  action: "context.set('response', 'world')"
+  confidence: 0.95
+  tags: ["greeting", "test"]

@@ -5,11 +5,12 @@ import difflib
 import os
 from datetime import datetime
 from symbolic_ai.symbolic_context import symbolic_context
-
+from core.network_access import NetworkAccess  # Importación agregada
 
 class EvoCodex:
     def __init__(self, root_path="."):
         self.root_path = root_path
+        self.network = NetworkAccess(verbose=False)  # Instancia de NetworkAccess
 
     def analizar_codigo(self, file_path):
         try:
@@ -57,7 +58,7 @@ class EvoCodex:
 
         return True, log_path
 
-    def ejecutar_auto_reescritura(self, file_path):
+    def execute_auto_rewrite(self, file_path):
         tree, source = self.analizar_codigo(file_path)
         if tree is None:
             symbolic_context.register_metacognition(f"Syntax error detected in {file_path}")

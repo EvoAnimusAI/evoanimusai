@@ -19,7 +19,7 @@ def learn_from_web(consciousness, net, topic: str, url: str, context, cycle: int
     Efectúa registro trazado de síntesis y conceptos en almacenamiento y logs.
 
     :param consciousness: Núcleo de consciencia con evaluación de integridad.
-    :param net: Módulo de red que permite extracción y síntesis.
+    :param net: Módulo de red que permite extraction y síntesis.
     :param topic: Tópico objetivo del aprendizaje.
     :param url: Fuente URL validada.
     :param context: Módulo contextual para integración simbólica.
@@ -39,7 +39,7 @@ def learn_from_web(consciousness, net, topic: str, url: str, context, cycle: int
         log_synthesis(f"📚 Resumen '{topic}':\n{summary}")
         save_topic_summary(topic, summary, cycle)
 
-        # Extracción y registro de conceptos simbólicos
+        # Extraction y registro de conceptos simbólicos
         for concept in extract_symbolic_concepts(summary):
             context.add_concept(concept, source=f"wiki:{topic}")
             log_concept(concept, source=f"wiki:{topic}")

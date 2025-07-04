@@ -1,9 +1,7 @@
 {
   "functions": [
     {
-      "name": "prueba",
-      "code": "def prueba(): return 42",
-      "metadata": {}
+      "code": "x = 1 + 2"
     }
   ]
 }

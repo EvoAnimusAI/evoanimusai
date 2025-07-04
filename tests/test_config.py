@@ -1,73 +1,78 @@
-import os
+import builtins
 import json
+import os
 import pytest
-from core.config import Config
+from unittest.mock import mock_open, patch
+from core import config
 
-VALID_CONFIG = {
+VALID_CONFIG_JSON = {
     "app_name": "EvoAI",
-    "version": "1.0.0",
+    "version": "1.0",
     "debug": False,
-    "database_url": "sqlite:///evoai.db",
+    "database_url": "sqlite:///prod.db",
     "max_workers": 8,
     "timeout_seconds": 60
 }
 
-def write_json(tmp_path, data):
-    path = tmp_path / "config.json"
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f)
-    return path
+def test_load_from_file_success(monkeypatch):
+    m = mock_open(read_data=json.dumps(VALID_CONFIG_JSON))
+    with patch("builtins.open", m):
+        cfg = config.Config.load_from_file("fake_path.json")
+        assert cfg.app_name == VALID_CONFIG_JSON["app_name"]
+        assert cfg.version == VALID_CONFIG_JSON["version"]
+        # Singleton instance set
+        assert config.Config._instance is cfg
 
-def test_load_valid_config(tmp_path):
-    path = write_json(tmp_path, VALID_CONFIG)
-    cfg = Config.load_from_file(str(path))
-    assert cfg.app_name == VALID_CONFIG["app_name"]
-    assert cfg.version == VALID_CONFIG["version"]
-    assert cfg.debug == VALID_CONFIG["debug"]
-    assert cfg.max_workers == VALID_CONFIG["max_workers"]
-    assert cfg.timeout_seconds == VALID_CONFIG["timeout_seconds"]
-    assert cfg.database_url == VALID_CONFIG["database_url"]
-
-def test_missing_required_fields(tmp_path):
-    config = VALID_CONFIG.copy()
-    del config["app_name"]
-    path = write_json(tmp_path, config)
-    with pytest.raises(ValueError) as e:
-        Config.load_from_file(str(path))
-    assert "app_name" in str(e.value)
-
-def test_invalid_types(tmp_path):
-    config = VALID_CONFIG.copy()
-    config["max_workers"] = 0  # invalid, must be >= 1
-    path = write_json(tmp_path, config)
-    with pytest.raises(ValueError):
-        Config.load_from_file(str(path))
-
-def test_env_overrides(tmp_path, monkeypatch):
-    path = write_json(tmp_path, VALID_CONFIG)
-    monkeypatch.setenv("DEBUG", "true")
-    monkeypatch.setenv("MAX_WORKERS", "10")
-    cfg = Config.load_from_file(str(path))
-    assert cfg.debug is True
-    assert cfg.max_workers == 10
-
-def test_get_instance_before_load():
-    Config._instance = None  # reset singleton forcibly
-    with pytest.raises(RuntimeError):
-        Config.get_instance()
-
-def test_get_instance_after_load(tmp_path):
-    path = write_json(tmp_path, VALID_CONFIG)
-    cfg1 = Config.load_from_file(str(path))
-    cfg2 = Config.get_instance()
-    assert cfg1 is cfg2
-
-def test_invalid_json(tmp_path):
-    path = tmp_path / "bad.json"
-    path.write_text("{invalid json}", encoding="utf-8")
-    with pytest.raises(json.JSONDecodeError):
-        Config.load_from_file(str(path))
-
-def test_file_not_found(tmp_path):
+def test_load_from_file_not_found():
     with pytest.raises(FileNotFoundError):
-        Config.load_from_file(str(tmp_path / "nonexistent.json"))
+        config.Config.load_from_file("nonexistent.json")
+
+def test_load_from_file_invalid_json(monkeypatch):
+    m = mock_open(read_data="not a json")
+    with patch("builtins.open", m):
+        with pytest.raises(json.JSONDecodeError):
+            config.Config.load_from_file("invalid.json")
+
+def test_env_overrides(monkeypatch):
+    m = mock_open(read_data=json.dumps(VALID_CONFIG_JSON))
+    with patch("builtins.open", m):
+        monkeypatch.setenv("DEBUG", "true")
+        monkeypatch.setenv("MAX_WORKERS", "12")
+        monkeypatch.setenv("TIMEOUT_SECONDS", "45")
+        cfg = config.Config.load_from_file("dummy.json")
+        assert cfg.debug is True
+        assert cfg.max_workers == 12
+        assert cfg.timeout_seconds == 45
+
+def test_missing_required_fields(monkeypatch):
+    data = {"debug": True}
+    m = mock_open(read_data=json.dumps(data))
+    with patch("builtins.open", m):
+        with pytest.raises(ValueError):
+            config.Config.load_from_file("missing.json")
+
+def test_invalid_app_name(monkeypatch):
+    data = {"app_name": "", "version": "1.0"}
+    m = mock_open(read_data=json.dumps(data))
+    with patch("builtins.open", m):
+        with pytest.raises(ValueError):
+            config.Config.load_from_file("invalid_app_name.json")
+
+def test_invalid_version(monkeypatch):
+    data = {"app_name": "EvoAI", "version": ""}
+    m = mock_open(read_data=json.dumps(data))
+    with patch("builtins.open", m):
+        with pytest.raises(ValueError):
+            config.Config.load_from_file("invalid_version.json")
+
+def test_get_instance_without_load():
+    config.Config._instance = None
+    with pytest.raises(RuntimeError):
+        config.Config.get_instance()
+
+def test_get_instance_after_load(monkeypatch):
+    m = mock_open(read_data=json.dumps(VALID_CONFIG_JSON))
+    with patch("builtins.open", m):
+        cfg1 = config.Config.load_from_file("file.json")
+        cfg2 = config.Config.get_instance()
+        assert cfg1 is cfg2

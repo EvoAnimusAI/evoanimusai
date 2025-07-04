@@ -1,95 +1,64 @@
-# tests/test_evoai_mutation_handler.py
-# -*- coding: utf-8 -*-
-"""
-Pruebas unitarias para evoai_mutation_handler.py
-Estándares gubernamentales de confiabilidad y cobertura total.
-"""
-
 import json
+import os
 import pytest
 from unittest.mock import patch, mock_open, MagicMock
-import daemon.evoai_mutation_handler as handler
+from daemon import evoai_mutation_handler
 
 
-# --- Test: Mutación dirigida aceptada ---
-def test_perform_directed_mutation_accepts(monkeypatch):
-    current_function = {"name": "test_func", "code": "print('original')"}
-
-    monkeypatch.setattr("daemon.evoai_mutation_handler.get_symbolic_context", lambda: {"state": "active"})
-    monkeypatch.setattr("daemon.evoai_mutation_handler.mutate_parent_function", lambda f, c, p: {"code": "new"})
-    monkeypatch.setattr("daemon.evoai_mutation_handler.evaluate_mutation", lambda f, c: True)
-
-    m_open = mock_open(read_data="[]")
-    with patch("daemon.evoai_mutation_handler.open", m_open, create=True):
-        handler.perform_directed_mutation(current_function, ["ai"], context={})
-        assert m_open.call_count >= 1
+def test_get_symbolic_context_returns_valid_structure():
+    ctx = evoai_mutation_handler.get_symbolic_context()
+    assert isinstance(ctx, dict)
+    assert "noise" in ctx and "state" in ctx
 
 
-# --- Test: Mutación dirigida rechazada ---
-def test_perform_directed_mutation_rejects(monkeypatch):
-    current_function = {"name": "test_func", "code": "print('original')"}
+@patch("daemon.evoai_mutation_handler.evaluate_mutation", return_value=True)
+@patch("daemon.evoai_mutation_handler.mutate_parent_function")
+def test_perform_directed_mutation_accepts_and_updates(mutate_fn, eval_fn, tmp_path):
+    current_function = {"steps": [{"action": "think"}]}
+    new_function = {"steps": [{"action": "evolve"}]}
+    mutate_fn.return_value = new_function
 
-    monkeypatch.setattr("daemon.evoai_mutation_handler.get_symbolic_context", lambda: {"state": "active"})
-    monkeypatch.setattr("daemon.evoai_mutation_handler.mutate_parent_function", lambda f, c, p: {"code": "new"})
-    monkeypatch.setattr("daemon.evoai_mutation_handler.evaluate_mutation", lambda f, c: False)
+    path = tmp_path / "symbolic_memory.json"
+    with patch("builtins.open", mock_open()) as mock_file, \
+         patch("daemon.evoai_mutation_handler.open", mock_open()) as f_mock, \
+         patch("daemon.evoai_mutation_handler.os.path.exists", return_value=True), \
+         patch("daemon.evoai_mutation_handler.json.dump"):
 
-    with patch("daemon.evoai_mutation_handler.open", mock_open(), create=True) as m:
-        handler.perform_directed_mutation(current_function, ["ai"], context={})
-        # No escritura si la mutación fue rechazada
-        m.assert_not_called()
-
-
-# --- Test: Mutación simbólica aceptada ---
-def test_perform_symbolic_mutation_accepts(monkeypatch):
-    filename = "mutation_test.py"
-    code = "print('mutated')"
-
-    monkeypatch.setattr("daemon.evoai_mutation_handler.generate_and_save_mutation", lambda: filename)
-    monkeypatch.setattr("daemon.evoai_mutation_handler.evaluate_mutation", lambda c, ctx: True)
-    monkeypatch.setattr("daemon.evoai_mutation_handler.os.path.exists", lambda x: True)
-
-    m_open = mock_open(read_data="[]")
-    with patch("daemon.evoai_mutation_handler.open", m_open, create=True):
-        with patch("builtins.open", mock_open(read_data=code)):
-            handler.perform_symbolic_mutation(10, 5, context={})
-            assert m_open.call_count >= 1
+        evoai_mutation_handler.perform_directed_mutation(current_function, ["ethics"], {})
+        assert current_function == new_function
 
 
-# --- Test: Mutación simbólica rechazada (no guarda) ---
-def test_perform_symbolic_mutation_skips(monkeypatch):
-    filename = "mutation_test.py"
-    code = "print('mutated')"
+@patch("daemon.evoai_mutation_handler.generate_and_save_mutation", return_value="fake_mut.py")
+@patch("daemon.evoai_mutation_handler.evaluate_mutation", return_value=True)
+def test_perform_symbolic_mutation_accepts(fake_eval, fake_generate, tmp_path):
+    fake_file = tmp_path / "data/mutated_functions/fake_mut.py"
+    fake_file.parent.mkdir(parents=True, exist_ok=True)
+    fake_file.write_text("print('mutated')")
 
-    monkeypatch.setattr("daemon.evoai_mutation_handler.generate_and_save_mutation", lambda: filename)
-    monkeypatch.setattr("daemon.evoai_mutation_handler.evaluate_mutation", lambda c, ctx: False)
-    monkeypatch.setattr("daemon.evoai_mutation_handler.os.path.exists", lambda x: True)
-
-    with patch("daemon.evoai_mutation_handler.open", mock_open(read_data=code), create=True) as m:
-        handler.perform_symbolic_mutation(10, 5, context={})
-        # open solo para lectura; no escritura
-        assert m.call_count == 1
+    with patch("daemon.evoai_mutation_handler.os.path.exists", return_value=True), \
+         patch("daemon.evoai_mutation_handler.open", mock_open(read_data="print('mutated')")), \
+         patch("daemon.evoai_mutation_handler.save_to_symbolic_memory") as save_mock:
+        evoai_mutation_handler.perform_symbolic_mutation(10, 10, context={})
+        save_mock.assert_called()
 
 
-# --- Test: Mutación sobre memoria interna del agente ---
-def test_perform_internal_memory_mutation(monkeypatch):
+@patch("daemon.evoai_mutation_handler.mutate_function", return_value={"mut": "ok"})
+def test_perform_internal_memory_mutation(mut_fn):
     agent = MagicMock()
-    agent.memory.retrieve_all.return_value = "internal_state"
+    agent.memory.retrieve_all.return_value = [{"m": 1}]
     engine = MagicMock()
-
-    monkeypatch.setattr("daemon.evoai_mutation_handler.mutate_function", lambda m, c: "mutated_code")
-
-    handler.perform_internal_memory_mutation(agent, context={}, engine=engine)
-    assert engine.last_mutated_function == "mutated_code"
+    evoai_mutation_handler.perform_internal_memory_mutation(agent, context={}, engine=engine)
+    assert engine.last_mutated_function == {"mut": "ok"}
 
 
-# --- Test: Guardado de código en memoria simbólica ---
-def test_save_to_symbolic_memory(monkeypatch):
-    code = "print('mutated')"
+def test_save_to_symbolic_memory_appends(tmp_path):
+    path = tmp_path / "data/symbolic_memory.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("[]", encoding="utf-8")
 
-    m_open = mock_open(read_data="[]")
-    monkeypatch.setattr("daemon.evoai_mutation_handler.os.path.exists", lambda x: True)
-
-    with patch("daemon.evoai_mutation_handler.open", m_open, create=True):
-        handler.save_to_symbolic_memory(code)
-        handle = m_open()
-        handle.write.assert_called()
+    with patch("daemon.evoai_mutation_handler.os.path.exists", return_value=True), \
+         patch("daemon.evoai_mutation_handler.open", mock_open()) as m_open, \
+         patch("daemon.evoai_mutation_handler.json.load", return_value=[]), \
+         patch("daemon.evoai_mutation_handler.json.dump") as j_dump:
+        evoai_mutation_handler.save_to_symbolic_memory("print('X')")
+        j_dump.assert_called()

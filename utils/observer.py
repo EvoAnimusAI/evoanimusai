@@ -1,6 +1,9 @@
 # utils/observer.py
+# Observador simbiótico con trazabilidad visible en consola
 
-from utils.logger import log_event
+from utils import evo_logging as logging
+import datetime
+
 
 class SymbioticObserver:
     def __init__(self):
@@ -8,12 +11,14 @@ class SymbioticObserver:
         self.events = []
 
     def record_event(self, event_type, **kwargs):
-        event = {"type": event_type, "details": kwargs}
+        timestamp = datetime.datetime.utcnow().isoformat() + "Z"
+        event = {"timestamp": timestamp, "type": event_type, "details": kwargs}
         self.events.append(event)
-        print(f"[🧠 Observer] Event recorded: {event}")
+
+        logging.log("OBSERVER", f"[{event_type.upper()}] {kwargs}", level="INFO")
+        print(f"[🧠 Observer] [{timestamp}] Event recorded: {event_type.upper()} -> {kwargs}")
 
     def observe(self, environment, agent):
-        # Symbiotic observation of environment and agent
         environment_state = environment.get_state() if hasattr(environment, "get_state") else {}
         last_action = getattr(agent, "last_action", None)
         memory = getattr(agent, "memory", [])
@@ -26,7 +31,6 @@ class SymbioticObserver:
             }
         }
 
-        # Automatic logging
-        log_event("observation", observation=self.state)
-
+        logging.log("OBSERVER", "Environment and agent observed.", level="INFO")
+        print(f"[🧠 Observer] Observation recorded → last_action={last_action}, memory_len={len(memory)}")
         return self.state

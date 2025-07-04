@@ -14,36 +14,36 @@
 [2025-06-30 01:17:56] INFO - 🧠 Síntesis simbólica: Resumen síntesis
 [2025-06-30 03:07:04] INFO - Mensaje de prueba
 [2025-06-30 03:07:04] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 03:07:04] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 03:07:04] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 03:07:04] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 03:07:04] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 03:20:32] INFO - Mensaje de prueba
 [2025-06-30 03:20:32] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 03:20:32] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 03:20:32] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 03:20:32] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 03:20:32] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 06:43:49] INFO - Mensaje de prueba
 [2025-06-30 06:43:49] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 06:43:49] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 06:43:49] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 06:43:49] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 06:43:49] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 06:46:21] INFO - Mensaje de prueba
 [2025-06-30 06:46:21] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 06:46:21] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 06:46:21] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 06:46:21] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 06:46:21] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 06:48:05] INFO - Mensaje de prueba
 [2025-06-30 06:48:05] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 06:48:05] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 06:48:05] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 06:48:05] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 06:48:05] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 07:25:25] INFO - Mensaje de prueba
 [2025-06-30 07:25:25] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 07:25:25] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 07:25:25] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 07:25:25] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 07:25:25] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.
 [2025-06-30 07:26:46] INFO - Mensaje de prueba
 [2025-06-30 07:26:46] INFO - 🤖 Nuevo agente activo: AGENTE_X
-[2025-06-30 07:26:47] INFO - 📌 Decisión [acción] del agente EvoAI: iniciar módulo
+[2025-06-30 07:26:47] INFO - 📌 Decisión [action] del agente EvoAI: iniciar módulo
 [2025-06-30 07:26:47] INFO - 🔍 Concepto registrado (red): autonomía
 [2025-06-30 07:26:47] INFO - 🧠 Síntesis simbólica: Síntesis de ideas sobre redes neuronales.

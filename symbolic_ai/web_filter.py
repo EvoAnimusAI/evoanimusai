@@ -16,7 +16,7 @@ KEY_TERMS_RE = re.compile(r'\b(' + '|'.join(re.escape(term) for term in KEY_TERM
 class WebFilter:
     """
     Clase para filtrar y extraer conceptos simbólicos relevantes desde texto plano,
-    eliminando ruido y aplicando reglas específicas.
+    eliminando noise y aplicando reglas específicas.
     """
 
     @staticmethod
@@ -65,12 +65,12 @@ class WebFilter:
                 reverse=True
             )
 
-            logger.info(f"Extracción completada: {min(max_concepts, len(ranked_lines))} conceptos encontrados.")
+            logger.info(f"Extraction completada: {min(max_concepts, len(ranked_lines))} conceptos encontrados.")
 
             return ranked_lines[:max_concepts]
 
         except Exception as e:
-            logger.exception("Error inesperado durante la extracción de conceptos simbólicos.")
+            logger.exception("Error inesperado durante la extraction de conceptos simbólicos.")
             raise e
 
 

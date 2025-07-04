@@ -13,7 +13,7 @@ class SymbolicExpression:
     Métodos:
         evaluate(context): Evalúa la expresión simbólica en un contexto dado.
         head(): Devuelve el operador principal si es una estructura compuesta.
-        body(): Extrae la acción de una expresión textual simbólica.
+        body(): Extrae la action de una expresión textual simbólica.
     """
 
     def __init__(self, expression: Union[str, int, float, dict]):
@@ -68,8 +68,8 @@ class SymbolicExpression:
 
     def body(self) -> Optional[str]:
         """
-        Extrae la parte 'acción' de una expresión textual simbólica:
-        Ejemplo: ⟦rol:valor⟧ ⇒ acción :: condición
+        Extracts the 'action' part de una expresión textual simbólica:
+        Ejemplo: ⟦rol:valor⟧ ⇒ action :: condición
         """
         if isinstance(self.expression, str):
             try:

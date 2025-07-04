@@ -1,33 +1,48 @@
+# -*- coding: utf-8 -*-
+"""
+Módulo de gestión avanzada de errores para EvoAnimusAI.
+
+🔐 Nivel: Militar / Gubernamental
+📌 Propósito:
+    - Centralizar el tratamiento, registro y respuesta ante excepciones.
+    - Proveer mecanismos de defensa ante fallos simbólicos, mutaciones peligrosas y errores catastróficos.
+    - Habilitar auditoría estructural y ejecución segura.
+"""
+
 import logging
-from typing import Callable, Type, Optional, Any, Dict
 import functools
+import traceback
+import sys
+import os
+from typing import Callable, Type, Optional, Any, Dict
 
 class ErrorHandler:
     """
-    Centralized error handling utility.
-
-    Provides structured exception handling, logging,
-    and optional callback execution on errors.
-
-    Attributes:
-        logger (logging.Logger): Logger instance for error reporting.
-        error_registry (Dict[Type[BaseException], str]): Map of exception types to error codes or messages.
+    Utilidad centralizada de gestión de errores con soporte para:
+        - Registro estandarizado.
+        - Asociación de códigos de error.
+        - Decoradores de ejecución protegida.
+        - Cierre crítico del sistema.
     """
-
+    
     def __init__(self, logger: Optional[logging.Logger] = None) -> None:
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or logging.getLogger("EvoAI.ErrorHandler")
         self.error_registry: Dict[Type[BaseException], str] = {}
 
     def register_error(self, error_type: Type[BaseException], error_code: str) -> None:
-        """
-        Registers an error type with a specific code or label.
-
-        Args:
-            error_type (Type[BaseException]): Exception class to register.
-            error_code (str): Identifier or code for the error type.
-        """
+        """Registra un tipo de error con un código personalizado."""
         self.error_registry[error_type] = error_code
-        self.logger.debug(f"Registered error type {error_type} with code '{error_code}'")
+        self.logger.debug(f"[Registro de Error] {error_type.__name__} → '{error_code}'")
+
+    def _get_error_code(self, exc_type: Type[BaseException]) -> str:
+        """Obtiene el código registrado para un tipo de excepción."""
+        return self.error_registry.get(exc_type, "UNKNOWN_ERROR")
+
+    def log_exception(self, exc: Exception, context: Optional[str] = None) -> None:
+        """Registra una excepción con información contextual adicional."""
+        context_msg = f"Contexto: {context}" if context else "Sin contexto adicional"
+        error_code = self._get_error_code(type(exc))
+        self.logger.error(f"[Excepción - {error_code}] {exc} | {context_msg}", exc_info=True)
 
     def handle(
         self,
@@ -37,29 +52,9 @@ class ErrorHandler:
         suppress: bool = False,
     ) -> Callable:
         """
-        Decorator to wrap function calls with error handling.
-        Supports usage with or without parameters.
-
-        Usage:
-            @handler.handle
-            def func(...):
-                ...
-
-            or
-
-            @handler.handle(suppress=True, on_error=callback)
-            def func(...):
-                ...
-
-        Args:
-            func (Optional[Callable]): Function to wrap (if decorator used without parameters).
-            on_error (Optional[Callable[[Exception], Any]]): Optional callback to execute on error.
-            suppress (bool): If True, suppresses exceptions and logs only.
-
-        Returns:
-            Callable: Wrapped function with error handling.
+        Decorador para ejecutar funciones con manejo automático de errores.
+        Soporta uso con y sin argumentos.
         """
-
         def decorator(f: Callable) -> Callable:
             @functools.wraps(f)
             def wrapper(*args, **kwargs):
@@ -67,45 +62,44 @@ class ErrorHandler:
                     return f(*args, **kwargs)
                 except Exception as e:
                     error_code = self._get_error_code(type(e))
-                    self.logger.error(f"Error [{error_code}]: {e}", exc_info=True)
+                    self.logger.error(f"[Error atrapado - {error_code}] {e}", exc_info=True)
                     if on_error:
                         try:
                             on_error(e)
                         except Exception as cb_exc:
-                            self.logger.error(f"Error in on_error callback: {cb_exc}", exc_info=True)
+                            self.logger.error(f"[Fallo en on_error callback] {cb_exc}", exc_info=True)
                     if not suppress:
                         raise
                     return None
-
             return wrapper
 
-        if func is not None:
-            # Decorator used without parameters
-            return decorator(func)
+        return decorator(func) if func is not None else decorator
 
-        # Decorator used with parameters
-        return decorator
-
-    def _get_error_code(self, exc_type: Type[BaseException]) -> str:
+    def handle_mutation_error(self, exc: Exception, function_name: Optional[str] = None) -> None:
         """
-        Retrieves the registered error code for a given exception type.
-
-        Args:
-            exc_type (Type[BaseException]): Exception class.
-
-        Returns:
-            str: Error code or 'UNKNOWN_ERROR' if not registered.
+        Manejo especializado de errores ocurridos durante mutaciones simbólicas.
         """
-        return self.error_registry.get(exc_type, "UNKNOWN_ERROR")
+        context = f"Mutación fallida en función: {function_name}" if function_name else "Mutación simbólica fallida"
+        self.log_exception(exc, context=context)
+        # Aquí se podría notificar al módulo de autoconsciencia o activar un rollback
 
-    def log_exception(self, exc: Exception, context: Optional[str] = None) -> None:
+    def critical_shutdown(self, reason: str) -> None:
         """
-        Logs an exception with optional contextual information.
+        Cierre estructurado del sistema en caso de error crítico irreversible.
+        """
+        self.logger.critical(f"[APAGADO CRÍTICO] Motivo: {reason}")
+        # Posible extensión: notificar por red, registrar evento en disco, invocar backup
+        sys.exit(100)
 
-        Args:
-            exc (Exception): The exception instance.
-            context (Optional[str]): Additional context for logging.
+    def wrap_safe_execution(self, func: Callable) -> Callable:
         """
-        context_msg = f"Context: {context}" if context else "No additional context"
-        error_code = self._get_error_code(type(exc))
-        self.logger.error(f"Exception [{error_code}]: {exc} | {context_msg}", exc_info=True)
+        Decorador para envolver funciones en ejecución segura. Ideal para agentes, mutaciones y lógica simbólica.
+        """
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                self.log_exception(e, context=f"Ejecución segura de {func.__name__}")
+                return None  # Se puede personalizar según criticidad
+        return wrapped

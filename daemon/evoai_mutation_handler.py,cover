@@ -1,0 +1,87 @@
+  # evoai_mutation_handler.py
+  # -*- coding: utf-8 -*-
+> """
+> Manejador de mutaciones simbólicas y dirigidas para EvoAI.
+> Estándar gubernamental de control adaptativo y evaluación continua.
+> """
+  
+! import os
+! import json
+! import logging
+! import random
+! from autoprogramming.directed_mutation import mutate_parent_function
+! from autoprogramming.mutation_evaluation import evaluate_mutation
+! from autoprogramming.mutation_generator import generate_and_save_mutation
+! from mutations.mutation_engine import mutate_function
+  
+! logger = logging.getLogger("EvoAI.MutationHandler")
+  
+  
+! def get_symbolic_context():
+!     return {
+!         'noise': random.choice(["neutral", "harmonic", "chaos", "tension", "calm", None]),
+!         'state': random.choice(["normal", "active", "stressed"])
+!     }
+  
+  
+! def perform_directed_mutation(current_function, preferred_topics, context):
+!     """
+!     Ejecuta mutación dirigida basada en contexto simbólico.
+!     """
+!     ctx = get_symbolic_context()
+!     logger.info(f"🧠 Contexto simbólico dirigido: {ctx}")
+  
+!     new_func = mutate_parent_function(current_function, ctx, preferred_topics)
+!     if evaluate_mutation(new_func, ctx):
+!         logger.info("✔ Mutación dirigida aceptada")
+!         current_function.clear()
+!         current_function.update(new_func)
+!         with open("symbolic_memory.json", "w", encoding="utf-8") as f:
+!             json.dump(current_function, f, indent=2, ensure_ascii=False)
+!     else:
+!         logger.info("✘ Mutación dirigida rechazada")
+  
+  
+! def perform_symbolic_mutation(cycle_counter, cycles_to_mutate, context):
+!     """
+!     Ejecuta mutación simbólica cada N ciclos.
+!     """
+!     if cycle_counter % cycles_to_mutate != 0:
+!         return
+  
+!     logger.info("🔁 Ejecutando mutación simbólica...")
+!     filename = generate_and_save_mutation()
+!     path = f"data/mutated_functions/{filename}"
+  
+!     if os.path.exists(path):
+!         with open(path, "r", encoding="utf-8") as f:
+!             code = f.read()
+  
+!         if evaluate_mutation({"code": code}, context):
+!             logger.info(f"✅ Mutación simbólica aceptada: {filename}")
+!             save_to_symbolic_memory(code)
+!         else:
+!             logger.info(f"❌ Mutación simbólica rechazada: {filename}")
+  
+  
+! def perform_internal_memory_mutation(agent, context, engine):
+!     """
+!     Ejecuta mutación sobre la memoria del agente.
+!     """
+!     logger.info("🔄 Mutación interna basada en memoria activa del agente")
+!     mutated = mutate_function(agent.memory.retrieve_all(), context)
+!     engine.last_mutated_function = mutated
+  
+  
+! def save_to_symbolic_memory(code: str):
+!     """
+!     Guarda fragmento de código mutado en memoria simbólica.
+!     """
+!     path = "data/symbolic_memory.json"
+!     memory = []
+!     if os.path.exists(path):
+!         with open(path, "r", encoding="utf-8") as f:
+!             memory = json.load(f)
+!     memory.append({"code": code, "origin": "mutation"})
+!     with open(path, "w", encoding="utf-8") as f:
+!         json.dump(memory, f, indent=2, ensure_ascii=False)

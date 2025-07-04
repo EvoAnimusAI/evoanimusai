@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-no-spanish
+        name: Check that no Spanish terms exist
+        entry: bash scripts/check_spanish_terms.sh
+        language: system
+        types: [python, text]
+        exclude: ^scripts/

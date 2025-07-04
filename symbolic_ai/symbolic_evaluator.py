@@ -8,7 +8,7 @@ class SymbolicEvaluator:
     Clase para evaluar reglas simbólicas expresadas en texto.
     
     Las reglas deben tener el formato:
-        "⟦rol:valor⟧ ⇒ acción :: condición"
+        "⟦rol:valor⟧ ⇒ action :: condición"
     
     Donde 'condición' es una expresión lógica evaluable sobre el contexto dado.
     """

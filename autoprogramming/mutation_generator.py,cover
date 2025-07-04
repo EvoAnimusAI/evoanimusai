@@ -1,0 +1,94 @@
+  # evoai/autoprogramming/mutation_generator.py
+  
+> import inspect
+> import os
+> import json
+> import hashlib
+> import uuid
+> from datetime import datetime
+> from typing import Optional
+  
+> from autoprogramming.base_symbols import basic_advance
+> from autoprogramming.mutation_operator import mutate_function
+> from autoprogramming.symbolic_function import SymbolicFunction
+  
+> OUTPUT_DIR = "data/mutated_functions"
+> LOG_FILE = os.path.join(OUTPUT_DIR, "mutation_log.json")
+> SIGNING_SECRET = "evoai_secret"  # 🔐 Reemplazar con secreto seguro
+  
+  
+> def _generate_metadata(source_function_name: str) -> dict:
+>     return {
+>         "uuid": uuid.uuid4().hex,
+>         "timestamp": datetime.utcnow().isoformat() + "Z",
+>         "source_function": source_function_name
+>     }
+  
+  
+> def _sign_entry(entry: dict, secret: str) -> str:
+>     serialized = json.dumps(entry, sort_keys=True)
+>     return hashlib.sha256((serialized + secret).encode("utf-8")).hexdigest()
+  
+  
+> def _log_mutation(symbolic_function: SymbolicFunction):
+>     os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+  
+>     entry = {
+>         "filename": f"{symbolic_function.name}.py",
+>         "metadata": symbolic_function.metadata,
+>         "signature": _sign_entry(symbolic_function.to_dict(), SIGNING_SECRET)
+>     }
+  
+>     if os.path.exists(LOG_FILE):
+!         with open(LOG_FILE, "r") as f:
+!             log_data = json.load(f)
+>     else:
+>         log_data = []
+  
+>     log_data.append(entry)
+>     with open(LOG_FILE, "w") as f:
+>         json.dump(log_data, f, indent=2)
+  
+  
+> def generate_and_save_mutation() -> SymbolicFunction:
+>     """
+>     Genera una mutación de la función `basic_advance`, la guarda en disco
+>     y la devuelve como objeto SymbolicFunction.
+>     """
+>     os.makedirs(OUTPUT_DIR, exist_ok=True)
+  
+>     original_code = inspect.getsource(basic_advance)
+>     mutated_code = mutate_function(original_code)
+>     metadata = _generate_metadata("basic_advance")
+  
+>     safe_id = metadata["uuid"][:8]
+>     safe_timestamp = metadata["timestamp"].replace(":", "").replace("-", "").replace(".", "")
+>     func_name = f"mutation_{safe_timestamp}_{safe_id}"
+  
+>     symbolic_function = SymbolicFunction(
+>         name=func_name,
+>         code=mutated_code,
+>         metadata=metadata
+>     )
+  
+>     file_path = os.path.join(OUTPUT_DIR, f"{func_name}.py")
+>     with open(file_path, "w") as f:
+>         f.write(mutated_code)
+  
+>     _log_mutation(symbolic_function)
+>     return symbolic_function
+  
+  
+> def generate_mutation(code: str, source_name: Optional[str] = "anonymous") -> SymbolicFunction:
+>     """
+>     Genera una mutación en memoria a partir de código dado.
+>     """
+>     mutated_code = mutate_function(code)
+>     metadata = _generate_metadata(source_name)
+  
+>     func_name = f"{source_name}_mut_{metadata['uuid'][:8]}"
+>     return SymbolicFunction(
+>         name=func_name,
+>         code=mutated_code,
+>         metadata=metadata
+>     )

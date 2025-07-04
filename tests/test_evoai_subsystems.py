@@ -1,58 +1,61 @@
-# tests/test_evoai_subsystems.py
 import pytest
 from unittest.mock import patch, MagicMock
 from daemon.evoai_subsystems import EvoAISubsystems
 
 
 @pytest.fixture
-def mock_engine():
-    return MagicMock(name="MockEngine")
+def mock_dependencies():
+    with patch("daemon.evoai_subsystems.EvoAIMonitor") as mock_monitor, \
+         patch("daemon.evoai_subsystems.CodeAnalyzer") as mock_analyzer, \
+         patch("daemon.evoai_subsystems.Autoconsciousness") as mock_conscious, \
+         patch("daemon.evoai_subsystems.NetworkAccess") as mock_net, \
+         patch("daemon.evoai_subsystems.EvoCodex") as mock_codex, \
+         patch("daemon.evoai_subsystems.EvoAIAnalyzerDaemon") as mock_daemon:
+        yield {
+            "monitor": mock_monitor,
+            "analyzer": mock_analyzer,
+            "conscious": mock_conscious,
+            "net": mock_net,
+            "codex": mock_codex,
+            "daemon": mock_daemon,
+        }
 
 
-@pytest.fixture
-def mock_context():
-    return MagicMock(name="MockContext")
+def test_subsystem_initialization(mock_dependencies):
+    engine = MagicMock()
+    context = MagicMock()
 
+    subsystems = EvoAISubsystems(engine, context)
 
-@patch("daemon.evoai_subsystems.EvoAIAnalyzerDaemon")
-@patch("daemon.evoai_subsystems.EvoCodex")
-@patch("daemon.evoai_subsystems.NetworkAccess")
-@patch("daemon.evoai_subsystems.Autoconsciousness")
-@patch("daemon.evoai_subsystems.CodeAnalyzer")
-@patch("daemon.evoai_subsystems.EvoAIMonitor")
-def test_evoai_subsystems_initialization(
-    mock_monitor,
-    mock_code_analyzer,
-    mock_consciousness,
-    mock_network,
-    mock_codex,
-    mock_analyzer_daemon,
-    mock_engine,
-    mock_context
-):
-    subsystems = EvoAISubsystems(engine=mock_engine, context=mock_context)
+    assert hasattr(subsystems, "monitor")
+    assert hasattr(subsystems, "code_analyzer")
+    assert hasattr(subsystems, "consciousness")
+    assert hasattr(subsystems, "network")
+    assert hasattr(subsystems, "codex")
+    assert hasattr(subsystems, "analyzer_daemon")
 
-    mock_monitor.assert_called_once()
-    mock_code_analyzer.assert_called_once_with(root_path=".")
-    mock_consciousness.assert_called_once_with(
+    mock_dependencies["monitor"].assert_called_once()
+    mock_dependencies["analyzer"].assert_called_once_with(root_path=".")
+    mock_dependencies["conscious"].assert_called_once_with(
         identity="Daniel Santiago Ospina Velasquez",
         agent_id="AV255583"
     )
-    mock_network.assert_called_once()
-    mock_codex.assert_called_once_with(root_path=".")
-    mock_analyzer_daemon.assert_called_once_with(
-        engine=mock_engine,
+    mock_dependencies["net"].assert_called_once()
+    mock_dependencies["codex"].assert_called_once_with(root_path=".")
+    mock_dependencies["daemon"].assert_called_once_with(
+        engine=engine,
         log_file="logs/logs_evoai.json",
         interval=20
     )
 
 
-@patch("daemon.evoai_subsystems.Autoconsciousness")
-def test_evoai_subsystems_activate_calls_declare_existence(mock_consciousness_class):
-    mock_consciousness_instance = MagicMock()
-    mock_consciousness_class.return_value = mock_consciousness_instance
+def test_activate_declares_existence(mock_dependencies):
+    engine = MagicMock()
+    context = MagicMock()
 
-    subsystems = EvoAISubsystems(engine=MagicMock(), context=MagicMock())
+    subsystems = EvoAISubsystems(engine, context)
+    subsystems.consciousness = MagicMock()
+
     subsystems.activate()
 
-    mock_consciousness_instance.declare_existence.assert_called_once()
+    subsystems.consciousness.declare_existence.assert_called_once()

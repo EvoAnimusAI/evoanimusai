@@ -1,0 +1,55 @@
+  # evoai_memory.py
+  # -*- coding: utf-8 -*-
+> """ Módulo de gestión de memoria simbólica de EvoAI (nivel gubernamental). """
+  
+! import os
+! import json
+! import logging
+! from typing import Any, Dict, List
+  
+! logger = logging.getLogger("EvoAI.Memory")
+  
+! SYMBOLIC_MEMORY_FILE = "data/symbolic_memory.json"
+! FUNCTION_MEMORY_FILE = "symbolic_memory.json"
+  
+  
+! def ensure_memory_file(path: str):
+!     """Crea el archivo si no existe."""
+!     if not os.path.exists(path):
+!         with open(path, "w", encoding="utf-8") as f:
+!             json.dump([], f, indent=2)
+  
+  
+! def load_symbolic_memory() -> List[Dict[str, Any]]:
+!     if not os.path.exists(SYMBOLIC_MEMORY_FILE):
+!         return []
+!     with open(SYMBOLIC_MEMORY_FILE, "r", encoding="utf-8") as f:
+!         return json.load(f)
+  
+  
+! def append_to_symbolic_memory(entry: Dict[str, Any]):
+!     memory = load_symbolic_memory()
+!     memory.append(entry)
+!     with open(SYMBOLIC_MEMORY_FILE, "w", encoding="utf-8") as f:
+!         json.dump(memory, f, indent=2, ensure_ascii=False)
+!     logger.info(f"[Memoria] Se agregó entrada simbólica (origin={entry.get('origin')})")
+  
+  
+! def save_function_memory(function: Dict[str, Any]):
+!     with open(FUNCTION_MEMORY_FILE, "w", encoding="utf-8") as f:
+!         json.dump(function, f, indent=2, ensure_ascii=False)
+!     logger.info("[Memoria] Función dirigida guardada.")
+  
+  
+! def load_function_memory() -> Dict[str, Any]:
+!     if not os.path.exists(FUNCTION_MEMORY_FILE):
+!         logger.warning("[Memoria] Archivo de función no existe. Se usará función por defecto.")
+!         return {
+!             "name": "base_function",
+!             "steps": [
+!                 {"action": "calm_down", "param": 1.0},
+!                 {"action": "slow_down", "param": 2.0}
+!             ]
+!         }
+!     with open(FUNCTION_MEMORY_FILE, "r", encoding="utf-8") as f:
+!         return json.load(f)

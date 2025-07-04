@@ -1,0 +1,75 @@
+  # core/tools.py
+  # -*- coding: utf-8 -*-
+> """
+> Gestor Centralizado de Herramientas Auxiliares - EvoAnimusAI
+> Nivel: Militar / Gubernamental / Ultra-secreto
+  
+> Este módulo define el ToolManager, responsable de inicializar y gestionar herramientas auxiliares 
+> de soporte al sistema EvoAnimusAI. Permite trazabilidad, modularidad y control centralizado.
+  
+> Funciones clave:
+> - Inicialización estructurada y controlada.
+> - Verbose logging para diagnósticos.
+> - Registro seguro de herramientas.
+  
+> Diseñado para integrarse con SymbolicDecisionEngine u otros núcleos sin acoplamiento directo.
+> """
+  
+! import logging
+! from typing import Dict, Optional
+  
+! logger = logging.getLogger("EvoAnimusAI.ToolManager")
+  
+  
+! class ToolManager:
+!     """
+!     Manejador de herramientas auxiliares para EvoAnimusAI.
+  
+!     Asegura una inicialización trazable y controlada de utilitarios simbólicos, visuales u operativos.
+!     """
+  
+!     def __init__(self):
+!         self.tools: Dict[str, object] = {}
+!         self.initialized: bool = False
+  
+!     def initialize(self, verbose: bool = False) -> None:
+!         """
+!         Inicializa las herramientas auxiliares de forma segura.
+  
+!         Args:
+!             verbose (bool): Si se activa, se mostrarán mensajes detallados de cada paso.
+!         """
+!         if self.initialized:
+!             if verbose:
+!                 logger.info("[ToolManager] Ya fue inicializado. Ignorando segunda inicialización.")
+!             return
+  
+!         try:
+!             if verbose:
+!                 logger.info("[ToolManager] Inicializando herramientas auxiliares...")
+  
+              # Inicialización de herramientas futuras (placeholder)
+              # self.tools['visualizer'] = Visualizer()
+              # self.tools['debugger'] = Debugger()
+              # self.tools['entropy_controller'] = SymbolicEntropyController()
+  
+              # Marcar como inicializado
+!             self.initialized = True
+  
+!             if verbose:
+!                 logger.info("[ToolManager] Inicialización completada con éxito.")
+!         except Exception as e:
+!             logger.error(f"[ToolManager] Error crítico durante la inicialización: {str(e)}")
+!             raise
+  
+!     def get_tool(self, name: str) -> Optional[object]:
+!         """
+!         Accede a una herramienta registrada.
+  
+!         Args:
+!             name (str): Nombre de la herramienta.
+  
+!         Returns:
+!             Objeto herramienta o None si no existe.
+!         """
+!         return self.tools.get(name)

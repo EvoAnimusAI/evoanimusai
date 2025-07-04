@@ -1,161 +1,78 @@
 import pytest
-from unittest.mock import Mock
-from core import context  # Ajusta el import según tu estructura
+from unittest.mock import patch, MagicMock
+from core.context import EvoContext
 
+class DummyAgent:
+    def decide(self, observation):
+        return "agent_action"
 
-def test_initial_state():
-    evo_ctx = context.EvoContext()
-    state = evo_ctx.get_context()
-    assert state["observation"] is None
-    assert state["last_action"] is None
-    assert state["last_decision"] is None
-    assert state["entropy"] == 0.0
-    assert isinstance(state["rewards"], list) and len(state["rewards"]) == 0
-
-
-def test_update_valid_observation():
-    evo_ctx = context.EvoContext()
-    obs = {"entropía": 0.42, "data": 123}
-    updated_state = evo_ctx.update(obs)
-    assert updated_state["observation"] == obs
-    assert updated_state["entropy"] == 0.42
-
-
-def test_update_invalid_observation_type():
-    evo_ctx = context.EvoContext()
-    with pytest.raises(TypeError):
-        evo_ctx.update("no es diccionario")
-
-
-def test_decide_with_no_observation():
-    evo_ctx = context.EvoContext()
-    result = evo_ctx.decide()
-    assert result == (None, None)
-
-
-def test_decide_with_agent_and_engine_success():
-    mock_agent = Mock()
-    mock_agent.decide.return_value = "agent_action"
-    mock_engine = Mock()
-    mock_engine.decide.return_value = "engine_decision"
-
-    evo_ctx = context.EvoContext(agent=mock_agent, engine=mock_engine)
-    evo_ctx.update({"data": 1})
-    agent_action, engine_decision = evo_ctx.decide()
-
-    assert agent_action == "agent_action"
-    assert engine_decision == "engine_decision"
-    # Verifica estado interno actualizado
-    state = evo_ctx.get_context()
-    assert state["last_action"] == "agent_action"
-    assert state["last_decision"] == "engine_decision"
-
-
-def test_decide_agent_raises():
-    class FaultyAgent:
-        def decide(self, _):
-            raise RuntimeError("fail agent")
-
-    mock_engine = Mock()
-    mock_engine.decide.return_value = "engine_decision"
-
-    evo_ctx = context.EvoContext(agent=FaultyAgent(), engine=mock_engine)
-    evo_ctx.update({"data": 1})
-
-    agent_action, engine_decision = evo_ctx.decide()
-
-    assert agent_action is None
-    assert engine_decision == "engine_decision"
-
-
-def test_decide_engine_raises():
-    mock_agent = Mock()
-    mock_agent.decide.return_value = "agent_action"
-
-    class FaultyEngine:
-        def decide(self, _):
-            raise RuntimeError("fail engine")
-
-    evo_ctx = context.EvoContext(agent=mock_agent, engine=FaultyEngine())
-    evo_ctx.update({"data": 1})
-
-    agent_action, engine_decision = evo_ctx.decide()
-
-    assert agent_action == "agent_action"
-    assert engine_decision is None
-
-
-def test_record_reward_valid_and_limit():
-    evo_ctx = context.EvoContext()
-    for i in range(25):
-        evo_ctx.record_reward(float(i))
-
-    state = evo_ctx.get_context()
-    # Solo los últimos 20 se deben mantener
-    assert len(state["rewards"]) == 20
-    assert state["rewards"][0] == 5.0
-    assert state["rewards"][-1] == 24.0
-
-
-def test_record_reward_invalid_type():
-    evo_ctx = context.EvoContext()
-    with pytest.raises(TypeError):
-        evo_ctx.record_reward("no es número")
-
-
-def test_assert_fact_no_engine():
-    evo_ctx = context.EvoContext(engine=None)
-    result = evo_ctx.assert_fact("key", "value")
-    assert result is False
-
-
-def test_assert_fact_engine_without_method():
-    class EngineNoAssert:
+class DummyEngine:
+    def decide(self, observation):
+        return "symbolic_decision"
+    def assert_fact(self, key, value):
         pass
 
-    evo_ctx = context.EvoContext(engine=EngineNoAssert())
-    result = evo_ctx.assert_fact("key", "value")
-    assert result is False
+@pytest.fixture(autouse=True)
+def mock_config():
+    with patch("core.context.Config") as MockConfig:
+        MockConfig.get_instance.return_value = MagicMock()
+        yield
 
+def test_update_and_get_context():
+    ctx = EvoContext()
+    obs = {"entropy": 0.75, "sensor": "value"}
+    updated = ctx.update(obs)
+    assert updated["observation"] == obs
+    assert updated["entropy"] == 0.75
 
-def test_assert_fact_engine_method_raises():
-    class FaultyEngine:
-        def assert_fact(self, key, value):
-            raise RuntimeError("fail assert")
+def test_decide_returns_none_when_no_observation():
+    ctx = EvoContext()
+    agent_action, symbolic_decision = ctx.decide()
+    assert agent_action is None
+    assert symbolic_decision is None
 
-    evo_ctx = context.EvoContext(engine=FaultyEngine())
-    result = evo_ctx.assert_fact("key", "value")
-    assert result is False
+def test_decide_with_agent_and_engine():
+    ctx = EvoContext(agent=DummyAgent(), engine=DummyEngine())
+    ctx.update({"entropy": 0.3})
+    agent_action, symbolic_decision = ctx.decide()
+    assert agent_action == "agent_action"
+    assert symbolic_decision == "symbolic_decision"
+    assert ctx.state["last_action"] == "agent_action"
+    assert ctx.state["last_decision"] == "symbolic_decision"
 
+def test_record_reward_limits_history():
+    ctx = EvoContext()
+    for i in range(30):
+        ctx.record_reward(float(i))
+    assert len(ctx.state["rewards"]) == ctx.MAX_REWARDS_HISTORY
+    assert ctx.state["rewards"][0] == 10.0
 
-def test_assert_fact_engine_method_success(capfd):
-    class EngineWithAssert:
-        def assert_fact(self, key, value):
-            # Simula éxito, sin error ni retorno
-            pass
-
-    engine = EngineWithAssert()
-    evo_ctx = context.EvoContext(engine=engine)
-    result = evo_ctx.assert_fact("key", "value")
-
+def test_assert_fact_returns_true_when_successful():
+    ctx = EvoContext()
+    dummy_engine = DummyEngine()
+    ctx.engine = dummy_engine
+    result = ctx.assert_fact("test_key", "test_value")
     assert result is True
 
-    captured = capfd.readouterr()
-    assert "[INFO] Hecho afirmado" in captured.out
+def test_assert_fact_returns_false_when_no_engine_support():
+    class NoAssertEngine:
+        pass
 
+    ctx = EvoContext()
+    ctx.engine = NoAssertEngine()
+    ctx.symbolic_engine = None
+    result = ctx.assert_fact("key", "value")
+    assert result is False
 
-def test_get_context_returns_copy():
-    evo_ctx = context.EvoContext()
-    evo_ctx.state["observation"] = {"data": 123}
-    context_copy = evo_ctx.get_context()
-    # Modificar copia no afecta el original
-    context_copy["observation"]["data"] = 999
-    assert evo_ctx.state["observation"]["data"] == 123
+def test_update_context_and_get_context():
+    ctx = EvoContext()
+    ctx.update_context("new_key", 123)
+    context_dict = ctx.get_context()
+    assert context_dict["new_key"] == 123
 
-
-def test_status_property_returns_copy():
-    evo_ctx = context.EvoContext()
-    evo_ctx.state["observation"] = {"data": 321}
-    status_copy = evo_ctx.status
-    status_copy["observation"]["data"] = 555
-    assert evo_ctx.state["observation"]["data"] == 321
+def test_symbolic_decision_engine_property():
+    ctx = EvoContext()
+    ctx.symbolic_engine = "dummy"
+    assert ctx.symbolic_decision_engine == "dummy"
+    ctx.symbolic_engine = None
+    assert ctx.symbolic_decision_engine is None

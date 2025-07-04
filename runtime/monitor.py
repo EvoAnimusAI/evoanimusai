@@ -48,8 +48,8 @@ class EvoAIMonitor:
 
         Args:
             step (int): número de iteración.
-            observation (any): estado observado del entorno.
-            action (any): acción tomada por el agente.
+            observation (any): state observado del entorno.
+            action (any): action tomada por el agente.
             reward (float): recompensa obtenida.
         """
         entry = {

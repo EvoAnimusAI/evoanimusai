@@ -1,109 +1,129 @@
+# core/engine.py
 # -*- coding: utf-8 -*-
 """
-Módulo Motor Simbólico Autónomo EvoAI
--------------------------------------
-
-Motor simbólico para selección, mutación y gestión de reglas con prioridad,
-adaptado a contexto operativo y trazabilidad completa.
-
-Cumple estándares militares y gubernamentales de seguridad, auditabilidad y control.
-
-Responsabilidades:
-- Decisión basada en reglas ponderadas
-- Mutación controlada y validada de reglas
-- Actualización de prioridades con validación de entradas
-- Persistencia simulada con trazabilidad de operaciones
+EvoAIEngine — Núcleo heurístico de EvoAnimusAI
+-----------------------------------------------
+- Motor de decisiones heurísticas basado en reglas y prioridad adaptativa
+- Compatible con aprendizaje simbólico, control de entropía y supervisión metacognitiva
+- Nivel: Militar / Gubernamental / Ultra
 """
 
-import random
 import logging
-from typing import Any, Dict, List, Optional
+import random
+import re
+from typing import Any, Dict, List
 
 from utils.default_rules import get_default_rules
+from symbolic_ai.symbolic_learning_engine import SymbolicLearningEngine
+from symbolic_ai.symbolic_entropy_controller import SymbolicEntropyController
+from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine
+from metacognition.metacognitive_supervisor import MetacognitiveSupervisor  # ✅ Integrado
 
 logger = logging.getLogger("EvoAI.Engine")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
+def parse_symbolic_rule(rule_str: str) -> Dict[str, Any]:
+    match = re.match(r"⟦(?P<rol>\w+):(?P<valor>\w+)⟧ ⇒ (?P<accion>\w+) :: (?P<condicion>.+)", rule_str)
+    if not match:
+        raise ValueError(f"[❌ ERROR] Formato inválido de regla simbólica: {rule_str}")
+    return {
+        "role": match.group("rol"),
+        "value": match.group("valor"),
+        "action": match.group("accion"),
+        "condition": match.group("condicion"),
+        "priority": 1.0
+    }
+
+class RuleEngineAdapter:
+    def __init__(self, rules: List[Dict[str, Any]]) -> None:
+        self.rules = [r for r in rules if isinstance(r, dict)]
+        print(f"[🔧 RuleEngineAdapter] Inicializado con {len(self.rules)} reglas válidas.")
+
+    def evaluate(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        print(f"[📥 EVALUATE] Contexto recibido: {context}")
+        results = []
+        for r in self.rules:
+            try:
+                cond = r.get("condition", "True")
+                if eval(cond, {}, context):  # ⚠️ Solo en entornos cerrados
+                    results.append(r)
+            except Exception as e:
+                print(f"[⚠️ ERROR] Evaluación fallida para regla {r}: {e}")
+        sorted_results = sorted(results, key=lambda r: r.get("priority", 1.0), reverse=True)
+        print(f"[📤 RESULTADOS] Evaluación heurística: {sorted_results}")
+        return sorted_results
+
+    def add_rule(self, rule: Any) -> None:
+        print(f"[➕ ADD_RULE] Intentando agregar: {rule}")
+        if isinstance(rule, str):
+            try:
+                rule = parse_symbolic_rule(rule)
+            except ValueError as e:
+                print(f"[❌ ADD_RULE ERROR] {e}")
+                return
+        elif not isinstance(rule, dict):
+            print(f"[❌ ADD_RULE ERROR] Tipo no soportado: {type(rule)}")
+            return
+        self.rules.append(rule)
+        print(f"[✅ ADD_RULE] Regla agregada: {rule}")
+
+    def remove_rule(self, rule: Any) -> None:
+        print(f"[➖ REMOVE_RULE] Intentando eliminar: {rule}")
+        if rule in self.rules:
+            self.rules.remove(rule)
+            print("[✅ REMOVE_RULE] Regla eliminada.")
+        else:
+            print("[⚠️ REMOVE_RULE] Regla no encontrada.")
 
 class EvoAIEngine:
-    """
-    Motor simbólico autónomo con gestión avanzada de reglas y priorización.
-    """
+    def __init__(self) -> None:
+        print("[🔧 INIT] Iniciando EvoAnimusAI...")
+        self.rules = get_default_rules()
+        self.adapter = RuleEngineAdapter(self.rules)
+        self.learning_engine = SymbolicLearningEngine(self.adapter)
+        self.entropy_controller = SymbolicEntropyController(entropy=0.0)
+        self.metacog = MetacognitiveSupervisor(error_threshold=0.8, stagnation_limit=20)  # ✅ Militar
+        print(f"[INFO] [INIT] Motor heurístico inicializado con {len(self.rules)} reglas.")
 
-    def __init__(self, rules: Optional[List[Dict[str, Any]]] = None) -> None:
-        try:
-            self.rules: List[Dict[str, Any]] = rules if rules is not None else get_default_rules()
-            self.context: Dict[str, Any] = {}
-            logger.info(f"[Init] Motor inicializado con {len(self.rules)} reglas.")
-        except Exception as e:
-            logger.exception(f"[Init] Error al inicializar motor: {e}")
-            raise RuntimeError("Error crítico al inicializar motor simbólico.") from e
+    def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        print(f"\n🔄 [CICLO #{context.get('cycle', '?')}] ------------------------------")
+        print(f"[🧠 DECIDE] Contexto heurístico: {context}")
 
-    def decide(self, context: Dict[str, Any]) -> str:
-        if not isinstance(context, dict):
-            logger.error("[Decide] Contexto inválido, se esperaba dict.")
-            raise ValueError("El contexto debe ser un diccionario válido.")
-
-        self.context = context
-        logger.debug(f"[Decide] Contexto recibido: {context}")
-
-        if not self.rules:
-            logger.warning("[Decide] No hay reglas definidas, acción por defecto 'wait'.")
-            return "wait"
+        entropy = context.get("entropy", 0.0)
+        self.entropy_controller.update_entropy(entropy)
 
         try:
-            rule = max(self.rules, key=lambda r: r.get("priority", 0.0))
-            action = rule.get("action", "wait")
-            logger.info(f"[Decide] Acción seleccionada: {action} con prioridad {rule.get('priority')}")
-            return action
+            stop, reasons = self.metacog.should_stop(context)
+            if stop:
+                print(f"[🧠 METACOG STOP] Detenido por supervisor metacognitivo. Razones: {reasons}")
+                return {"action": "halt"}
         except Exception as e:
-            logger.exception(f"[Decide] Error al seleccionar acción: {e}")
-            raise RuntimeError("Fallo en decisión de acción.") from e
+            print(f"[⚠️ METACOG ERROR] Error en evaluación metacognitiva: {e}")
 
-    def mutate_rules(self) -> None:
-        if not self.rules:
-            logger.warning("[Mutate] Sin reglas para mutar.")
-            return
-        try:
-            rule = random.choice(self.rules)
-            old_priority = float(rule.get("priority", 0.5))
-            delta = random.uniform(-0.2, 0.2)
-            new_priority = round(min(1.0, max(0.0, old_priority + delta)), 2)
-            rule["priority"] = new_priority
-            logger.info(f"[Mutate] Mutación aplicada: acción '{rule.get('action')}', prioridad {old_priority} ➜ {new_priority}")
-        except Exception as e:
-            logger.exception(f"[Mutate] Error durante mutación de reglas: {e}")
-            raise RuntimeError("Fallo en mutación de reglas.") from e
+        if self.entropy_controller.requires_halt():
+            print("[🚨 HALT] Entropía excedida. Decisión: HALT")
+            return {"action": "halt"}
 
-    def get_rule_by_action(self, action: str) -> Optional[Dict[str, Any]]:
-        if not isinstance(action, str) or not action.strip():
-            logger.error("[GetRule] Acción inválida para búsqueda.")
-            raise ValueError("La acción debe ser una cadena no vacía.")
+        evaluated = self.adapter.evaluate(context)
 
-        rule = next((r for r in self.rules if r.get("action") == action), None)
-        if rule:
-            logger.debug(f"[GetRule] Regla encontrada para acción '{action}'.")
+        if evaluated:
+            selected = evaluated[0]
+            print(f"[✅ SELECTED] Acción seleccionada: {selected.get('action')}")
+            return {"action": selected.get("action", "wait")}
         else:
-            logger.debug(f"[GetRule] No se encontró regla para acción '{action}'.")
-        return rule
+            print("[⚠️ DEFAULT ACTION] Acción: wait")
+            return {"action": "wait"}
 
-    def update_rule(self, rule: Dict[str, Any], reward: float) -> None:
-        if not isinstance(reward, (int, float)):
-            logger.error(f"[UpdateRule] Recompensa inválida: {reward}")
-            raise ValueError("La recompensa debe ser un número (int o float).")
+    def learn(self, context: Dict[str, Any], action: str, reward: float) -> None:
+        print(f"[📚 LEARN] Observación: {context}, Acción: {action}, Recompensa: {reward}")
+        try:
+            self.learning_engine.update_rule(action, reward)
+        except Exception as e:
+            print(f"[❌ ERROR] Fallo en aprendizaje simbólico: {e}")
 
-        if "priority" not in rule:
-            logger.error("[UpdateRule] Regla no contiene campo 'priority'.")
-            raise KeyError("La regla debe contener la clave 'priority'.")
-
-        old_priority = float(rule.get("priority", 0.5))
-        updated_priority = round(min(1.0, max(0.0, old_priority + 0.1 * reward)), 2)
-        rule["priority"] = updated_priority
-        logger.info(f"[UpdateRule] Prioridad regla '{rule.get('action')}' actualizada: {old_priority} ➜ {updated_priority}")
-
-    def save_rules(self) -> None:
-        logger.info("[SaveRules] Reglas simbólicas guardadas (simulado).")
-
-
-# Alias para compatibilidad con código legado o tests
-SymbolicEngine = EvoAIEngine
+        try:
+            self.entropy_controller.update_entropy_change(reward)
+        except AttributeError as e:
+            print(f"[❌ ERROR] Faltante método 'update_entropy_change': {e}")
+        except Exception as e:
+            print(f"[❌ ERROR] Fallo en controlador de entropía: {e}")

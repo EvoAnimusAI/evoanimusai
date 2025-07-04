@@ -1,19 +1,25 @@
-.PHONY: test coverage clean
+.PHONY: check-spanish fix-terms tox qa
 
-VENV := .venv
-PYTHON := $(VENV)/bin/python
-COVERAGE := $(VENV)/bin/coverage
+check-spanish:
+	@bash scripts/check_spanish_terms.sh
 
-# Ejecutar tests con cobertura y reporte
-test:
-	$(COVERAGE) run -m unittest discover -s tests -p "test_*.py"
-	$(COVERAGE) report -m
+fix-terms:
+	@echo "🔧 Corrigiendo términos en español por sus equivalentes en inglés..."
+	@find . -type f \
+		-not -path "./.venv/*" \
+		-not -path "./.git/*" \
+		-not -name "*.md" \
+		-not -name "*.po" \
+		-not -name "*.txt" \
+		-exec sed -i \
+			-e "s/entrop[ií]a/entropy/g" \
+			-e "s/acción/action/g" \
+			-e "s/ruido/noise/g" \
+			-e "s/estado/state/g" {} +;
+	@echo "✅ Corrección automática completada."
 
-# Ejecutar solo reporte de cobertura (asumiendo que ya se ejecutó test)
-coverage:
-	$(COVERAGE) report -m
+tox:
+	tox
 
-# Limpiar archivos de cobertura
-clean:
-	rm -f .coverage
-	find . -type d -name "__pycache__" -exec rm -rf {} +
+qa:
+	pre-commit run --all-files

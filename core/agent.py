@@ -1,21 +1,26 @@
 # core/agent.py
+
 import logging
 import random
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 from math import log2
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+
+from core.memory import AgentMemory  # ✅ CORREGIDO: usamos AgentMemory
 
 logger = logging.getLogger(__name__)
+
 
 @runtime_checkable
 class ContextProtocol(Protocol):
     def assert_fact(self, key: str, value: Any) -> None: ...
     def update(self, data: Dict[str, Any]) -> None: ...
 
+
 class EvoAgent:
     def __init__(self, context: Optional[ContextProtocol] = None, name: str = "EvoAgent") -> None:
         self.name = name
         self.context = context
-
+        self.memory = AgentMemory()  # ✅ CORREGIDO: asignación explícita
         self.entropy: float = 0.0
         self.rewards: List[float] = []
         self.states: List[Dict[str, Any]] = []
@@ -28,20 +33,27 @@ class EvoAgent:
         if self.context and not isinstance(self.context, ContextProtocol):
             logger.warning(f"[{self.name}] El contexto no cumple con el protocolo esperado.")
 
-        # Registrar el nombre del agente como hecho simbólico
         if self.context:
             try:
-                self.context.assert_fact("agent_name", self.name)
+                self.assert_fact("agent_name", self.name)
                 logger.info(f"[{self.name}] Identidad simbólica registrada.")
             except Exception as e:
                 logger.error(f"[{self.name}] Error registrando identidad simbólica: {e}")
 
+    def assert_fact(self, key: str, value: Any) -> None:
+        if not self.context:
+            logger.error(f"[{self.name}] No hay contexto asignado para afirmar hecho: {key} = {value}")
+            return
+        if not hasattr(self.context, "assert_fact") or not callable(getattr(self.context, "assert_fact")):
+            logger.error(f"[{self.name}] Contexto no implementa método 'assert_fact'. No se puede afirmar: {key} = {value}")
+            return
+        try:
+            self.context.assert_fact(key, value)
+            logger.info(f"[{self.name}] Hecho afirmado: {key} = {value}")
+        except Exception as e:
+            logger.error(f"[{self.name}] Error afirmando hecho '{key}': {e}")
+
     def perceive(self, observation: Dict[str, Any]) -> None:
-        """
-        Integra una observación externa al contexto del agente.
-        Sanitiza la observación para aceptar solo claves tipo str y valores básicos.
-        Traduce 'pos' a 'position' para el contexto simbólico.
-        """
         if not isinstance(observation, dict):
             raise TypeError("Observation must be a dictionary")
 
@@ -49,10 +61,7 @@ class EvoAgent:
 
         if self.context:
             if "pos" in sanitized:
-                try:
-                    self.context.assert_fact("position", sanitized["pos"])
-                except Exception as e:
-                    logger.error(f"[{self.name}] Error afirmando 'position': {e}")
+                self.assert_fact("position", sanitized["pos"])
             try:
                 self.context.update(sanitized)
             except Exception as e:
@@ -76,36 +85,21 @@ class EvoAgent:
         return sanitized
 
     def decide(self, observation: Dict[str, Any]) -> str:
-        """
-        Selecciona una acción basada en la observación dada.
-        Implementa una lógica simple por ahora.
-        """
         logger.info(f"[{self.name}] Observación recibida para decisión: {observation}")
-
         possible_actions = ["explore", "wait", "calm", "advance"]
         action = random.choice(possible_actions)
-
         logger.info(f"[{self.name}] Acción decidida: {action}")
-
         self.states.append(observation)
         return action
 
     def learn(self, observation: Dict[str, Any], action: str, reward: float) -> None:
-        """
-        Aprende del resultado de la acción tomando en cuenta la recompensa.
-        Actualiza la entropía de las recompensas recientes usando Shannon.
-        """
         logger.info(f"[{self.name}] Aprendiendo -> Obs: {observation}, Acción: {action}, Recompensa: {reward}")
         self.rewards.append(reward)
-
         if len(self.rewards) > 1:
             self.entropy = self._calculate_entropy()
             logger.info(f"[{self.name}] Entropía actualizada: {self.entropy:.4f}")
 
     def _calculate_entropy(self) -> float:
-        """
-        Calcula la entropía de Shannon de las últimas 10 recompensas.
-        """
         recent_rewards = self.rewards[-10:]
         freq = {}
         for r in recent_rewards:

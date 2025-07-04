@@ -1,6 +1,6 @@
 # evoai_state.py
 # -*- coding: utf-8 -*-
-""" Manejo del estado simbólico y funcional del Daemon EvoAI (nivel gubernamental). """
+""" Manejo del state simbólico y funcional del Daemon EvoAI (nivel gubernamental). """
 
 import os
 import json

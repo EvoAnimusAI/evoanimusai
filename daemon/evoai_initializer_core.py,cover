@@ -1,0 +1,66 @@
+  # daemon/evoai_initializer_core.py
+  # -*- coding: utf-8 -*-
+> """
+> Inicializador del núcleo EvoAI.
+> Carga segura de configuración, contexto, agente, motor simbólico, decisión, ejecutor y herramientas.
+> Cumple con estándares gubernamentales, científicos y de ultra secreto.
+> """
+  
+! import logging
+! from core.config import Config
+! from core.context import EvoContext
+! from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine  # ✅ Motor simbólico real
+! from daemon.evoai_initializer_security import load_secure_key
+! from daemon.evoai_initializer_agent import initialize_agent
+! from daemon.evoai_initializer_engine import initialize_engine
+! from daemon.evoai_initializer_executor import initialize_executor
+! from daemon.evoai_initializer_tools import initialize_support_tools
+! from daemon.evoai_initializer_decision import initialize_decision
+  
+! logger = logging.getLogger("EvoAI.Core")
+  
+! def initialize_core_components():
+!     logger.info("[INIT] Inicializando núcleo EvoAI...")
+  
+      # 🔐 Seguridad: Cargar clave maestra
+!     daemon_key = load_secure_key()
+  
+      # ⚙️ Configuración obligatoria antes de cualquier uso del sistema
+!     try:
+!         Config.load_from_file("config/evo_config.json")
+!         logger.info("[CONFIG] Configuración cargada exitosamente.")
+!     except Exception as e:
+!         logger.critical(f"[CONFIG] Fallo al cargar configuración: {e}")
+!         raise SystemExit(1)
+  
+      # 🧠 Contexto simbiótico-evolutivo
+!     context = EvoContext()
+  
+      # 🤖 Inicialización del agente principal
+!     agent = initialize_agent(context=context)
+  
+      # 🔄 Inicialización del motor de aprendizaje o evolución
+!     engine = initialize_engine(agent, context)
+  
+      # ✅ Motor simbólico real (para el sistema de decisión)
+!     symbolic_engine = SymbolicRuleEngine()
+  
+      # 🧠🧠 Componente de decisión simbólica
+!     decision = initialize_decision(context, agent, symbolic_engine)
+  
+      # 🚀 Ejecutores de ciclo y action
+!     executor = initialize_executor(agent, engine, context)
+  
+      # 🧰 Herramientas de soporte (monitoring, IO, etc.)
+!     tools = initialize_support_tools(engine, context, daemon_key)
+  
+!     logger.info("[INIT] Núcleo EvoAI completamente inicializado y seguro.")
+  
+!     return {
+!         "context": context,
+!         "agent": agent,
+!         "engine": engine,
+!         "decision": decision,
+!         "executor": executor,
+!         **tools,
+!     }

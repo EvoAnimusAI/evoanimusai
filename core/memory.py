@@ -26,9 +26,17 @@ class AgentMemory:
         if input_data is None:
             logger.warning("Attempted to store None data; ignoring.")
             return
-
         self._memory_store.append(input_data)
         logger.debug(f"Data stored in memory: {input_data}")
+
+    def retrieve_all(self) -> List[Any]:
+        """
+        Retrieve all stored memory entries.
+
+        Returns:
+            List[Any]: All items currently stored in memory.
+        """
+        return list(self._memory_store)
 
     def recall(self, index: int = -1) -> Optional[Any]:
         """

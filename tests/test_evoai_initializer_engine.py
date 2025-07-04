@@ -1,31 +1,20 @@
-# tests/test_evoai_initializer_engine.py
 import pytest
-import logging
-from daemon.evoai_initializer_engine import initialize_engine
-
-def test_initialize_engine_success(monkeypatch, caplog):
-    class DummyEngine:
-        def __init__(self):
-            self.name = "MockEngine"
-
-    monkeypatch.setattr("daemon.evoai_initializer_engine.EvoAIEngine", DummyEngine)
-
-    caplog.set_level(logging.INFO)
-    engine = initialize_engine()
-
-    assert isinstance(engine, DummyEngine)
-    assert "Motor inicializado correctamente." in caplog.text
-    assert engine.name == "MockEngine"
+from unittest.mock import patch, MagicMock
+from daemon import evoai_initializer_engine
 
 
-def test_initialize_engine_failure(monkeypatch, caplog):
-    def fail_engine():
-        raise RuntimeError("Simulated Engine Error")
+def test_initialize_engine_success():
+    with patch("daemon.evoai_initializer_engine.EvoAIEngine") as mock_engine_class:
+        mock_engine = MagicMock()
+        mock_engine_class.return_value = mock_engine
 
-    monkeypatch.setattr("daemon.evoai_initializer_engine.EvoAIEngine", fail_engine)
+        engine = evoai_initializer_engine.initialize_engine()
 
-    caplog.set_level(logging.ERROR)
-    with pytest.raises(RuntimeError, match="Simulated Engine Error"):
-        initialize_engine()
+        mock_engine_class.assert_called_once()
+        assert engine is mock_engine
 
-    assert "Error durante inicialización del motor" in caplog.text
+
+def test_initialize_engine_failure():
+    with patch("daemon.evoai_initializer_engine.EvoAIEngine", side_effect=RuntimeError("boom")):
+        with pytest.raises(RuntimeError, match="boom"):
+            evoai_initializer_engine.initialize_engine()

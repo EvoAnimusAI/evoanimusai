@@ -8,11 +8,11 @@ logging.basicConfig(level=logging.INFO)
 
 class Environment:
     """
-    Entorno simbólico para EvoAI que simula un espacio lineal con variables como energía,
-    entropía y ruido contextual. Permite ejecutar acciones que afectan el estado del agente.
+    Entorno simbólico para EvoAI que simula un espacio lineal con variables como energy,
+    entropy y noise contextual. Permite ejecutar acciones que afectan el state del agente.
     """
 
-    # Constantes de acción
+    # Constantes de action
     ACTION_EXPLORE = ("explore", "explorar")
     ACTION_ADVANCE = ("advance", "avanzar", "mover")
     ACTION_WAIT = ("wait", "esperar")
@@ -34,21 +34,21 @@ class Environment:
 
     def reset(self):
         """
-        Reinicia el entorno a su estado inicial.
+        Reinicia el entorno a su state inicial.
         """
         self.state = {
             "pos": 0,
-            "explorado": False,
-            "entropía": 0.0,
-            "energía": 100,
-            "ruido": None
+            "explored": False,
+            "entropy": 0.0,
+            "energy": 100,
+            "noise": None
         }
         self.visited.clear()
         logger.info("🔄 Entorno simbólico reiniciado.")
 
     def observe(self):
         """
-        Retorna una copia del estado actual del entorno.
+        Retorna una copia del state actual del entorno.
 
         Returns:
             dict: Estado simbólico del entorno.
@@ -57,7 +57,7 @@ class Environment:
 
     def act(self, action):
         """
-        Ejecuta una acción simbólica y retorna la recompensa y estado de término.
+        Ejecuta una action simbólica y retorna la recompensa y state de término.
 
         Args:
             action (str): Acción simbólica a ejecutar.
@@ -66,15 +66,15 @@ class Environment:
             tuple: (recompensa (float), finalización (bool))
 
         Raises:
-            TypeError: Si la acción no es cadena de texto.
-            ValueError: Si la acción es cadena vacía.
+            TypeError: Si la action no es cadena de texto.
+            ValueError: Si la action es cadena vacía.
         """
         if not isinstance(action, str):
-            logger.error("La acción debe ser una cadena de texto.")
-            raise TypeError("La acción debe ser una cadena de texto.")
+            logger.error("La action debe ser una cadena de texto.")
+            raise TypeError("La action debe ser una cadena de texto.")
         if not action:
-            logger.error("La acción no puede ser una cadena vacía.")
-            raise ValueError("La acción no puede ser una cadena vacía.")
+            logger.error("La action no puede ser una cadena vacía.")
+            raise ValueError("La action no puede ser una cadena vacía.")
 
         action = action.lower().strip()
         logger.debug(f"🎬 Acción simbólica recibida: {action}")
@@ -83,21 +83,21 @@ class Environment:
         done = False
         current_pos = self.state["pos"]
 
-        # Interpretación de acción
+        # Interpretación de action
         if action in self.ACTION_EXPLORE:
             if current_pos in self.visited:
                 reward = -0.2
                 logger.debug("🔁 Exploración redundante.")
             else:
                 reward = 2.0
-                self.state["explorado"] = True
+                self.state["explored"] = True
                 logger.info("🧭 Exploración nueva exitosa.")
                 self.visited.add(current_pos)
 
         elif action in self.ACTION_ADVANCE:
             if current_pos < self.max_position:
                 self.state["pos"] += 1
-                self.state["energía"] -= 5
+                self.state["energy"] -= 5
                 reward = 1.0
                 logger.info("🚶‍♂️ Movimiento hacia adelante.")
             else:
@@ -109,10 +109,10 @@ class Environment:
             logger.debug("⏳ Esperando...")
 
         elif action in self.ACTION_CALM:
-            old_entropy = self.state["entropía"]
-            self.state["entropía"] = max(0.0, old_entropy - 0.3)
+            old_entropy = self.state["entropy"]
+            self.state["entropy"] = max(0.0, old_entropy - 0.3)
             reward = 0.5 if old_entropy > 0.3 else -0.1
-            logger.info(f"🧘 Acción calmante: entropía de {old_entropy} → {self.state['entropía']}")
+            logger.info(f"🧘 Calming action: entropy de {old_entropy} → {self.state['entropy']}")
 
         elif action in self.ACTION_RESET:
             self.reset()
@@ -122,20 +122,20 @@ class Environment:
             reward = -1.0
             logger.warning(f"❌ Acción no reconocida: {action}")
 
-        # Efectos secundarios: entropía y ruido (excepto para 'calm')
+        # Efectos secundarios: entropy y noise (excepto para 'calm')
         if action not in self.ACTION_CALM:
-            self.state["entropía"] = round(random.uniform(0.0, 1.0), 2)
+            self.state["entropy"] = round(random.uniform(0.0, 1.0), 2)
 
-        self.state["ruido"] = random.choice(["calma", "tensión", "caos", "armónico", "neutro"])
+        self.state["noise"] = random.choice(["calma", "tensión", "caos", "armónico", "neutro"])
 
         # Condiciones de finalización
-        if self.state["energía"] <= 0:
+        if self.state["energy"] <= 0:
             logger.info("💀 Energía agotada.")
             done = True
         elif self.state["pos"] >= self.max_position:
             logger.info("🎯 Posición máxima alcanzada.")
             done = True
-        elif self.state["explorado"]:
+        elif self.state["explored"]:
             logger.info("✅ Exploración completa.")
             done = True
 

@@ -1,29 +1,29 @@
 import pytest
-from unittest.mock import patch, MagicMock
-from core.context import EvoContext
-from daemon.evoai_initializer_agent import initialize_agent
-
-
-@pytest.fixture(autouse=True)
-def mock_config_singleton():
-    with patch("core.config.Config.get_instance") as mock_get_instance:
-        mock_get_instance.return_value = MagicMock()
-        yield
+from unittest.mock import MagicMock, patch
+from daemon import evoai_initializer_agent
 
 
 def test_initialize_agent_success():
-    context = EvoContext()
-    agent = initialize_agent(name="UnidadAlpha", context=context)
-    assert agent.name == "UnidadAlpha"
-    assert agent.context is context
+    mock_context = MagicMock()
+
+    with patch("daemon.evoai_initializer_agent.EvoAgent") as mock_agent_class:
+        mock_agent = MagicMock()
+        mock_agent_class.return_value = mock_agent
+
+        agent = evoai_initializer_agent.initialize_agent(name="TestAgent", context=mock_context)
+
+        mock_agent_class.assert_called_once_with(name="TestAgent", context=mock_context)
+        assert agent is mock_agent
 
 
-def test_initialize_agent_default_name():
-    context = EvoContext()
-    agent = initialize_agent(context=context)
-    assert agent.name == "EvoAI"
+def test_initialize_agent_without_context_raises():
+    with pytest.raises(ValueError, match="contexto operativo.*obligatorio"):
+        evoai_initializer_agent.initialize_agent(name="NoContext")
 
 
-def test_initialize_agent_missing_context():
-    with pytest.raises(ValueError):
-        initialize_agent(name="SinContexto")
+def test_initialize_agent_exception_logged_and_raised():
+    mock_context = MagicMock()
+
+    with patch("daemon.evoai_initializer_agent.EvoAgent", side_effect=RuntimeError("explota")):
+        with pytest.raises(RuntimeError, match="explota"):
+            evoai_initializer_agent.initialize_agent(name="ErrorAgent", context=mock_context)

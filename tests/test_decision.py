@@ -1,101 +1,118 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import MagicMock
 from core.decision import DecisionEngine
+from symbolic_ai.symbolic_decision_engine import SymbolicDecisionEngine
 
-def get_mock_symbolic_engine():
-    mock = Mock()
-    mock.decide.return_value = "some_action"
-    mock.get_rule_by_action.return_value = "some_rule"
-    mock.update_rule.return_value = None
-    mock.mutate_rules.return_value = None
-    mock.save_rules.return_value = None
-    return mock
+class DummySymbolicEngine:
+    def decide(self):
+        return {"action": "dummy_action"}
 
-def test_init_with_default_engine():
-    engine = DecisionEngine()
-    assert engine.engine is not None
+    def get_rule_by_action(self, action):
+        if action == {"action": "dummy_action"}:
+            return {"rule": "dummy_rule"}
+        return None
 
-def test_init_with_custom_engine():
-    mock_engine = get_mock_symbolic_engine()
-    engine = DecisionEngine(symbolic_context=mock_engine)
-    assert engine.engine == mock_engine
+    def update_rule(self, rule, reward):
+        pass
 
-def test_init_invalid_engine_type():
+    def mutate_rules(self):
+        pass
+
+    def save_rules(self):
+        pass
+
+def test_init_with_symbolic_context():
+    dummy_engine = DummySymbolicEngine()
+    engine = DecisionEngine(symbolic_context=dummy_engine)
+    assert engine.engine == dummy_engine
+
+def test_init_without_context_raises():
+    with pytest.raises(ValueError):
+        DecisionEngine()
+
+def test_init_with_invalid_symbolic_context():
     with pytest.raises(TypeError):
-        DecisionEngine(symbolic_context="not_an_engine")
+        DecisionEngine(symbolic_context=object())
 
-def test_decide_success():
-    mock_engine = get_mock_symbolic_engine()
-    engine = DecisionEngine(symbolic_context=mock_engine)
-    context = {"state": "test"}
-    action = engine.decide(context)
-    assert action == "some_action"
-    mock_engine.decide.assert_called_once_with(context)
+def test_decide_returns_action():
+    dummy_engine = DummySymbolicEngine()
+    engine = DecisionEngine(symbolic_context=dummy_engine)
+    result = engine.decide()
+    assert result == {"action": "dummy_action"}
 
-def test_decide_with_none_context_raises():
-    engine = DecisionEngine()
-    with pytest.raises(ValueError):
-        engine.decide(None)
+def test_decide_raises_on_error():
+    class BadEngine(DummySymbolicEngine):
+        def decide(self):
+            raise Exception("fail")
 
-def test_decide_engine_raises_runtime_error():
-    mock_engine = get_mock_symbolic_engine()
-    mock_engine.decide.side_effect = RuntimeError("fail decide")
-    engine = DecisionEngine(symbolic_context=mock_engine)
+    engine = DecisionEngine(symbolic_context=BadEngine())
     with pytest.raises(RuntimeError):
-        engine.decide({"state": "test"})
+        engine.decide()
 
-def test_update_success_with_rule_found():
-    mock_engine = get_mock_symbolic_engine()
-    engine = DecisionEngine(symbolic_context=mock_engine)
-    action = "some_action"
-    reward = 1.0
-    engine.update(action, reward)
-    mock_engine.get_rule_by_action.assert_called_once_with(action)
-    mock_engine.update_rule.assert_called_once_with("some_rule", reward)
+def test_update_calls_update_rule():
+    dummy_engine = DummySymbolicEngine()
+    dummy_engine.update_rule = MagicMock()
+    dummy_engine.get_rule_by_action = MagicMock(return_value={"rule": "r"})
+    engine = DecisionEngine(symbolic_context=dummy_engine)
+    engine.update({"action": "dummy_action"}, 5.0)
+    dummy_engine.update_rule.assert_called_once_with({"rule": "r"}, 5.0)
 
-def test_update_success_with_no_rule_found(caplog):
-    mock_engine = get_mock_symbolic_engine()
-    mock_engine.get_rule_by_action.return_value = None
-    engine = DecisionEngine(symbolic_context=mock_engine)
-    with caplog.at_level("WARNING"):
-        engine.update("some_action", 1.0)
-    assert "No se encontró regla" in caplog.text
+def test_update_warns_no_rule(monkeypatch):
+    dummy_engine = DummySymbolicEngine()
+    dummy_engine.get_rule_by_action = MagicMock(return_value=None)
+    engine = DecisionEngine(symbolic_context=dummy_engine)
+    # Patch logger.warning to capture warning call
+    warnings = []
+    def fake_warning(msg):
+        warnings.append(msg)
+    monkeypatch.setattr(engine, "logger", MagicMock(warning=fake_warning))
+    engine.update({"action": "dummy_action"}, 5.0)
+    # Since no rule, warnings should be appended
+    assert len(warnings) == 1
 
-def test_update_invalid_reward_type():
-    engine = DecisionEngine()
+def test_update_raises_on_non_numeric_reward():
+    dummy_engine = DummySymbolicEngine()
+    engine = DecisionEngine(symbolic_context=dummy_engine)
     with pytest.raises(ValueError):
-        engine.update("some_action", "not_a_number")
+        engine.update({"action": "dummy_action"}, "not_a_number")
 
-def test_update_engine_raises_runtime_error():
-    mock_engine = get_mock_symbolic_engine()
-    mock_engine.get_rule_by_action.return_value = "rule1"
-    mock_engine.update_rule.side_effect = RuntimeError("fail update")
-    engine = DecisionEngine(symbolic_context=mock_engine)
+def test_update_raises_on_engine_error():
+    class BadEngine(DummySymbolicEngine):
+        def get_rule_by_action(self, action):
+            raise Exception("fail")
+
+    engine = DecisionEngine(symbolic_context=BadEngine())
     with pytest.raises(RuntimeError):
-        engine.update("some_action", 1.0)
+        engine.update({"action": "dummy_action"}, 5.0)
 
-def test_mutate_success():
-    mock_engine = get_mock_symbolic_engine()
-    engine = DecisionEngine(symbolic_context=mock_engine)
+def test_mutate_calls_engine():
+    dummy_engine = DummySymbolicEngine()
+    dummy_engine.mutate_rules = MagicMock()
+    engine = DecisionEngine(symbolic_context=dummy_engine)
     engine.mutate()
-    mock_engine.mutate_rules.assert_called_once()
+    dummy_engine.mutate_rules.assert_called_once()
 
-def test_mutate_engine_raises_runtime_error():
-    mock_engine = get_mock_symbolic_engine()
-    mock_engine.mutate_rules.side_effect = RuntimeError("fail mutate")
-    engine = DecisionEngine(symbolic_context=mock_engine)
+def test_mutate_raises_on_error():
+    class BadEngine(DummySymbolicEngine):
+        def mutate_rules(self):
+            raise Exception("fail")
+
+    engine = DecisionEngine(symbolic_context=BadEngine())
     with pytest.raises(RuntimeError):
         engine.mutate()
 
-def test_save_success():
-    mock_engine = get_mock_symbolic_engine()
-    engine = DecisionEngine(symbolic_context=mock_engine)
+def test_save_calls_engine():
+    dummy_engine = DummySymbolicEngine()
+    dummy_engine.save_rules = MagicMock()
+    engine = DecisionEngine(symbolic_context=dummy_engine)
     engine.save()
-    mock_engine.save_rules.assert_called_once()
+    dummy_engine.save_rules.assert_called_once()
 
-def test_save_engine_raises_runtime_error():
-    mock_engine = get_mock_symbolic_engine()
-    mock_engine.save_rules.side_effect = RuntimeError("fail save")
-    engine = DecisionEngine(symbolic_context=mock_engine)
+def test_save_raises_on_error():
+    class BadEngine(DummySymbolicEngine):
+        def save_rules(self):
+            raise Exception("fail")
+
+    engine = DecisionEngine(symbolic_context=BadEngine())
     with pytest.raises(RuntimeError):
         engine.save()

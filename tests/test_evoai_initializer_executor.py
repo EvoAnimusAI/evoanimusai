@@ -1,49 +1,47 @@
 import pytest
-from daemon.evoai_initializer_executor import initialize_executor
-from core.agent import EvoAgent
-from core.engine import EvoAIEngine
-from core.context import EvoContext
+from unittest.mock import MagicMock, patch
+from daemon import evoai_initializer_executor
 
-class DummyAgent(EvoAgent):
-    def __init__(self):
-        pass  # Mínima implementación para instanciar
-
-class DummyEngine(EvoAIEngine):
-    def __init__(self):
-        pass  # Mínima implementación para instanciar
-
-class DummyContext(EvoContext):
-    def __init__(self):
-        self.name = "test_context"
 
 def test_initialize_executor_success():
-    agent = DummyAgent()
-    engine = DummyEngine()
-    context = DummyContext()
+    mock_agent = MagicMock()
+    mock_engine = MagicMock()
+    mock_context = MagicMock()
 
-    executor = initialize_executor(agent, engine, context)
-    assert executor is not None
-    assert executor.agent == agent
-    assert executor.engine == engine
-    assert executor.context == context
+    with patch("daemon.evoai_initializer_executor.EvoAIMonitor") as mock_monitor_class, \
+         patch("daemon.evoai_initializer_executor.EvoAIExecutor") as mock_executor_class:
 
-def test_initialize_executor_missing_agent():
-    engine = DummyEngine()
-    context = DummyContext()
+        mock_monitor = MagicMock()
+        mock_executor = MagicMock()
+        mock_monitor_class.return_value = mock_monitor
+        mock_executor_class.return_value = mock_executor
 
-    with pytest.raises(ValueError, match="El agente es obligatorio"):
-        initialize_executor(None, engine, context)
+        executor = evoai_initializer_executor.initialize_executor(mock_agent, mock_engine, mock_context)
 
-def test_initialize_executor_missing_engine():
-    agent = DummyAgent()
-    context = DummyContext()
+        mock_monitor_class.assert_called_once()
+        mock_executor_class.assert_called_once_with(
+            agent=mock_agent, engine=mock_engine, monitor=mock_monitor, context=mock_context
+        )
+        assert executor is mock_executor
 
-    with pytest.raises(ValueError, match="El motor es obligatorio"):
-        initialize_executor(agent, None, context)
 
-def test_initialize_executor_missing_context():
-    agent = DummyAgent()
-    engine = DummyEngine()
+@pytest.mark.parametrize("agent,engine,context,expected_error", [
+    (None, MagicMock(), MagicMock(), "agente.*obligatorio"),
+    (MagicMock(), None, MagicMock(), "motor.*obligatorio"),
+    (MagicMock(), MagicMock(), None, "contexto.*obligatorio"),
+])
+def test_initialize_executor_missing_parameters(agent, engine, context, expected_error):
+    with pytest.raises(ValueError, match=expected_error):
+        evoai_initializer_executor.initialize_executor(agent, engine, context)
 
-    with pytest.raises(ValueError, match="El contexto operativo es obligatorio"):
-        initialize_executor(agent, engine, None)
+
+def test_initialize_executor_failure_on_internal_error():
+    mock_agent = MagicMock()
+    mock_engine = MagicMock()
+    mock_context = MagicMock()
+
+    with patch("daemon.evoai_initializer_executor.EvoAIMonitor"), \
+         patch("daemon.evoai_initializer_executor.EvoAIExecutor", side_effect=RuntimeError("boom")):
+
+        with pytest.raises(RuntimeError, match="boom"):
+            evoai_initializer_executor.initialize_executor(mock_agent, mock_engine, mock_context)

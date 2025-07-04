@@ -1,18 +1,4 @@
-"""
-strategies.strategy_manager
-
-Gestión avanzada de estrategias evolucionadas para EvoAI.
-
-Responsabilidades:
-- Generar estrategias mutadas con mutaciones autónomas.
-- Persistir y registrar las estrategias generadas.
-- Evaluar el desempeño de cada estrategia de forma científica.
-- Mantener un pool acotado con poda eficiente.
-- Soportar carga dinámica y ejecución segura.
-- Proveer logs estructurados para auditoría y debugging.
-
-Author: Daniel Santiago Ospina Velasquez
-"""
+# ... (encabezado y docstring igual)
 
 import os
 import time
@@ -37,43 +23,17 @@ os.makedirs(EVO_DIR, exist_ok=True)
 
 
 class StrategyManager:
-    """
-    Manager para generación, evaluación, persistencia y evolución
-    de estrategias simbólicas mutadas.
-
-    Attributes:
-        max_strategies (int): Máximo número de estrategias mantenidas.
-        strategies (List[Tuple[str, float, str]]): Lista de tuplas
-            (nombre, score, ruta archivo) de estrategias actuales.
-    """
-
     def __init__(self, max_strategies: int = 30):
         self.max_strategies = max_strategies
         self.strategies: List[Tuple[str, float, str]] = []
 
     def register_function(self, func: Callable, name: str = "base_function", score: float = 0.0, path: Optional[str] = None) -> None:
-        """
-        Registro manual de función como estrategia.
-
-        Args:
-            func (Callable): Función estrategia.
-            name (str): Identificador de la función.
-            score (float): Puntuación inicial.
-            path (Optional[str]): Ruta del archivo fuente si existe.
-        """
         self.strategies.append((name, score, path or "manual"))
         log_event("STRATEGY_REGISTERED", f"{name} (manual)")
 
     def generate_new_strategy(self) -> Optional[Tuple[str, str]]:
-        """
-        Genera una nueva estrategia mutada a partir del agente EvoAgent.
-
-        Returns:
-            Optional[Tuple[str, str]]: Nombre y ruta de archivo de la estrategia,
-            o None si falla el proceso.
-        """
         try:
-            agent = EvoAgent("EvoTemp", context=EvoContext())
+            agent = EvoAgent(context=EvoContext(), name="EvoTemp")
             knowledge = agent.memory.retrieve_all()
             context = agent.context
 
@@ -86,10 +46,8 @@ class StrategyManager:
 
             mutated.file_path = file_path
 
-            # Registro persistente
             register_mutated_function.register(strategy_name, mutated.description)
 
-            # Registro simbólico
             symbolic_context.add_concept({
                 "name": strategy_name,
                 "description": mutated.description,
@@ -105,31 +63,19 @@ class StrategyManager:
             return None
 
     def load_strategy(self, file_path: str) -> Optional[Callable]:
-        """
-        Carga dinámica y segura de función estrategia desde archivo.
-
-        Args:
-            file_path (str): Ruta absoluta del archivo Python.
-
-        Returns:
-            Optional[Callable]: Función cargada o None si falla.
-        """
         try:
             module_name = os.path.splitext(os.path.basename(file_path))[0]
             spec = importlib.util.spec_from_file_location(module_name, file_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            # Convención: función principal tiene el mismo nombre que el módulo
             func = getattr(module, module_name, None)
 
             if not callable(func):
                 log_event("ERROR_LOADING_STRATEGY", f"Función '{module_name}' no encontrada o no callable en {file_path}")
                 return None
 
-            # Log para indicar carga exitosa
             log_event("STRATEGY_LOADED", module_name)
-
             return func
 
         except Exception:
@@ -137,15 +83,6 @@ class StrategyManager:
             return None
 
     def evaluate_strategy(self, strategy_func: Callable) -> float:
-        """
-        Evalúa el desempeño de una estrategia sobre datos simulados.
-
-        Args:
-            strategy_func (Callable): Función estrategia a evaluar.
-
-        Returns:
-            float: Puntuación numérica del desempeño.
-        """
         try:
             data = np.random.randn(100)
             result = strategy_func(data)
@@ -153,7 +90,6 @@ class StrategyManager:
             if isinstance(result, (int, float)):
                 return float(result)
             else:
-                # Penaliza resultados no numéricos
                 return -10000.0
 
         except Exception:
@@ -161,12 +97,6 @@ class StrategyManager:
             return -10000.0
 
     def evolve(self, generations: int = 5) -> None:
-        """
-        Ciclo de evolución con generación, evaluación, y poda.
-
-        Args:
-            generations (int): Número de iteraciones a ejecutar.
-        """
         for _ in range(generations):
             gen_result = self.generate_new_strategy()
             if gen_result is None:
@@ -184,13 +114,9 @@ class StrategyManager:
             if len(self.strategies) > self.max_strategies:
                 self.prune()
 
-            time.sleep(0.1)  # Control de tasa
+            time.sleep(0.1)
 
     def prune(self) -> None:
-        """
-        Poda estrategias por debajo de la mediana de puntuación,
-        eliminando archivos y registros.
-        """
         try:
             scores = [s[1] for s in self.strategies]
             if not scores:
@@ -215,24 +141,9 @@ class StrategyManager:
             log_event("ERROR_PRUNING_STRATEGIES", traceback.format_exc())
 
     def get_top_strategies(self, top_n: int = 5) -> List[Tuple[str, float, str]]:
-        """
-        Obtiene las mejores estrategias según su puntuación.
-
-        Args:
-            top_n (int): Número de estrategias a obtener.
-
-        Returns:
-            List[Tuple[str, float, str]]: Lista ordenada (nombre, score, ruta).
-        """
         return sorted(self.strategies, key=lambda x: x[1], reverse=True)[:top_n]
 
     def save_symbolic_log(self, log_path: str = "logs/strategy_symbolic_log.txt") -> None:
-        """
-        Guarda el log simbólico de estrategias generadas para auditoría.
-
-        Args:
-            log_path (str): Ruta del archivo log.
-        """
         try:
             os.makedirs(os.path.dirname(log_path), exist_ok=True)
             with open(log_path, "w", encoding="utf-8") as f:

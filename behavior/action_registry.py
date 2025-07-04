@@ -48,14 +48,14 @@ class ActionRegistry:
         }
 
     def is_valid(self, action: str) -> bool:
-        """Retorna True si la acción existe directa o como alias."""
+        """Retorna True si la action existe directa o como alias."""
         return any(
             action == name or action in data['alias']
             for name, data in self._actions.items()
         )
 
     def get_description(self, action: str) -> str:
-        """Devuelve la descripción de una acción o 'Unknown action'."""
+        """Devuelve la descripción de una action o 'Unknown action'."""
         for name, data in self._actions.items():
             if action == name or action in data['alias']:
                 return data['desc']
@@ -67,7 +67,7 @@ class ActionRegistry:
 
     def register(self, name: str, description: str, priority: float = 0.5, alias: Optional[List[str]] = None) -> None:
         """
-        Registra una nueva acción. Las acciones protegidas no se pueden sobrescribir.
+        Registra una nueva action. Las acciones protegidas no se pueden sobrescribir.
         """
         if not name.isidentifier():
             raise ValueError(f"Invalid action name: '{name}'")
@@ -81,7 +81,7 @@ class ActionRegistry:
         self._actions[name] = self._make_action(description, priority, alias or [])
 
     def use_action(self, action: str) -> bool:
-        """Incrementa el contador de uso de una acción válida."""
+        """Incrementa el contador de uso de una action válida."""
         for name, data in self._actions.items():
             if action == name or action in data['alias']:
                 data['usage_count'] += 1

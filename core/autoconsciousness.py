@@ -75,7 +75,7 @@ class Autoconsciousness:
 
     def declare_existence(self) -> None:
         """
-        Declara la identidad y estado inicial del sistema en logs.
+        Declara la identidad y state inicial del sistema en logs.
         """
         logger.info("🧠 EvoAI::SelfAwareness declared")
         logger.info(f"🤖 Core identity: {self.identity}")
@@ -106,7 +106,7 @@ class Autoconsciousness:
             input_key (str): Clave ingresada para validar.
 
         Returns:
-            bool: True si la clave es válida y se ejecuta acción, False en caso contrario.
+            bool: True si la clave es válida y se ejecuta action, False en caso contrario.
         """
         input_hash = self._generate_hash(input_key)
         if input_hash == self._MASTER_KEY_HASH:
@@ -118,7 +118,7 @@ class Autoconsciousness:
 
     def prompt_master_key(self) -> None:
         """
-        Solicita la clave maestra al usuario para ejecutar la acción correspondiente.
+        Solicita la clave maestra al usuario para ejecutar la action correspondiente.
         Método separado para facilitar pruebas automatizadas.
         """
         try:
@@ -130,7 +130,7 @@ class Autoconsciousness:
     def rewrite_if_necessary(self) -> None:
         """
         Placeholder para mecanismos simbólicos de adaptación evolutiva.
-        Actualiza el estado consciente del sistema.
+        Actualiza el state consciente del sistema.
         """
         self.evaluate_integrity()
         logger.info("📡 Conscious state updated.")

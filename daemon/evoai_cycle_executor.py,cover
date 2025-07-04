@@ -1,0 +1,130 @@
+  # daemon/evoai_cycle_executor.py
+  # -*- coding: utf-8 -*-
+> """
+> Ejecutor principal del ciclo de vida EvoAI.
+  
+> Responsabilidad:
+> Controlar la ejecución iterativa del agente simbiótico-evolutivo,
+> evaluando decisiones, ejecutando acciones, afirmando hechos simbólicos,
+> y manteniendo integridad contextual.
+  
+> Nivel: Militar / Gubernamental / Ultra-secreto
+> """
+  
+! import time
+! import logging
+! import signal
+! from typing import Optional, Dict, Any
+  
+! from core.context import EvoContext
+! from core.agent import EvoAgent
+! from core.environment import Environment
+! from core.engine import EvoAIEngine
+! from core.self_diagnostics import run_integrity_diagnostics
+! from core.symbolic_decision_engine import SymbolicDecisionEngine
+! from core.input_sanitizer import InputSanitizer  # <-- Importación del sanitizador
+  
+! logger = logging.getLogger("EvoAIExecutor")
+! logging.basicConfig(level=logging.INFO)
+  
+! terminate_flag = False
+  
+  
+! def signal_handler(signum, frame):
+!     global terminate_flag
+!     logger.info(f"[🛑] Señal {signum} recibida. Terminando ciclo...")
+!     terminate_flag = True
+  
+  
+! def setup_signal_handlers():
+!     logger.info("⚙️ Configurando manejadores de señal para apagado...")
+!     signal.signal(signal.SIGINT, signal_handler)
+!     signal.signal(signal.SIGTERM, signal_handler)
+!     signal.signal(signal.SIGHUP, signal_handler)
+!     signal.signal(signal.SIGQUIT, signal_handler)
+!     logger.info("🧬 Señales capturadas: SIGINT, SIGTERM, SIGHUP, SIGQUIT")
+  
+  
+! def initialize_context() -> EvoContext:
+!     logger.info("[INIT] Inicializando núcleo EvoAI...")
+!     agent = EvoAgent(name="EvoAI")
+!     environment = Environment()
+!     engine = EvoAIEngine()
+!     context = EvoContext(agent=agent, engine=engine, environment=environment)
+!     logger.info("[EvoAI] Contexto creado.")
+  
+!     if hasattr(context, "assert_fact"):
+!         context.assert_fact("agent_identity", agent.name)
+!         logger.info("[EvoAI] Identidad simbólica registrada.")
+!     else:
+!         logger.warning("[WARN] No se puede registrar identidad simbólica: falta 'assert_fact'.")
+  
+!     return context
+  
+  
+! def run_cycle(context: EvoContext, cycle_num: int, sanitizer: InputSanitizer) -> Dict[str, Any]:
+!     logger.info(f"🤖 Iniciando ciclo #{cycle_num}")
+!     try:
+!         agent_action, symbolic_decision = context.decide()
+!         decision = symbolic_decision or agent_action or {"action": "wait"}
+  
+          # Validación de coherencia
+!         if decision.get("action") == "explore" and cycle_num % 5 == 0:
+!             logger.warning(f"[DUPLICATION WARNING] Acción 'explore' repetida en ciclo #{cycle_num}")
+  
+!         if isinstance(decision, dict) and "priority" in decision:
+!             decision["priority"] = round(decision["priority"] * 1.092, 4)
+!             logger.info(f"[Mutate] Acción '{decision['action']}' ➜ prioridad: {decision['priority']}")
+!         else:
+!             logger.info(f"[Action] Acción decidida: {decision}")
+  
+!         if hasattr(context, "assert_fact"):
+!             context.assert_fact("last_action", decision)
+!         else:
+!             logger.warning("[WARN] No se pudo afirmar el hecho simbólico.")
+  
+          # Obtener observación cruda
+!         raw_observation = context.environment.observe()
+  
+          # Saneamiento de variables críticas
+!         clean_observation = sanitizer.sanitize(raw_observation)
+  
+          # Actualizar contexto con observación saneada
+!         context.update(clean_observation)
+  
+!         logger.info(f"[Engine] Iteración #{cycle_num} completada.")
+!         symbolic_context_data = context.as_dict()
+!         logger.debug(f"[Context] Estado simbólico exportado: {symbolic_context_data}")
+!         return symbolic_context_data
+  
+!     except Exception as e:
+!         logger.error(f"[CRITICAL] Fallo en el ciclo #{cycle_num}: {e}", exc_info=True)
+!         return {"error": str(e), "cycle": cycle_num}
+  
+  
+! def run_cycle_loop(test_mode: bool = False):
+!     setup_signal_handlers()
+!     context = initialize_context()
+!     symbolic_engine = SymbolicDecisionEngine(context)
+!     context.symbolic_engine = symbolic_engine  # ✅ No sobrescribe el motor original
+  
+!     sanitizer = InputSanitizer()  # Instancia del sanitizador
+  
+!     logger.info("[INIT] Sistema simbiótico inicializado.")
+!     logger.info("[🩺] Ejecutando diagnóstico previo...")
+!     if not run_integrity_diagnostics(context):
+!         logger.error("[🧨] Fallo en diagnóstico. Abortando ciclo.")
+!         return
+!     logger.info("[✅] Diagnóstico superado.")
+  
+!     cycle_num = 0
+!     while not terminate_flag:
+!         run_cycle(context, cycle_num, sanitizer)
+!         cycle_num += 1
+!         time.sleep(0.1 if test_mode else 0.2)
+  
+!     logger.info("[🛑] Ciclo terminado manualmente.")
+  
+  
+! if __name__ == "__main__":
+!     run_cycle_loop()

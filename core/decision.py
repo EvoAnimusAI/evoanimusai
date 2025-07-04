@@ -1,77 +1,138 @@
+# core/decision.py
+# -*- coding: utf-8 -*-
+"""
+Módulo central de decisiones de EvoAnimusAI.
+Clasificación: Militar / Gubernamental / Ultra-secreto
+
+Encapsula el flujo de decisión simbólica, retroalimentación por refuerzo y mutación evolutiva.
+Auditable, validado y altamente trazable.
+"""
+
 import logging
 from typing import Optional, Any
 
-from core.engine import SymbolicEngine
+from symbolic_ai.symbolic_decision_engine import SymbolicDecisionEngine  # 🔁 Integración oficial
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("EvoAI.DecisionEngine")
+
 
 class DecisionEngine:
     """
-    Motor de decisiones que actúa como interfaz entre el sistema EvoAI y el motor simbólico.
-    Evalúa el contexto y decide qué acción seguir.
+    Motor de decisiones central. Orquesta el uso del motor simbólico para decidir,
+    actualizar, mutar y guardar reglas simbólicas.
 
     Attributes:
-        engine (SymbolicEngine): Motor simbólico para razonamiento y manipulación de reglas.
+        engine (SymbolicDecisionEngine): Motor simbólico acoplado dinámicamente.
     """
 
-    def __init__(self, symbolic_context: Optional[SymbolicEngine] = None) -> None:
+    logger = logging.getLogger("EvoAI.DecisionEngine")
+
+    engine: SymbolicDecisionEngine
+
+    def __init__(self, context: Optional[Any] = None, symbolic_context: Optional[SymbolicDecisionEngine] = None) -> None:
         """
-        Inicializa el motor de decisiones con un contexto simbólico.
-        Si no se proporciona, crea una instancia por defecto de SymbolicEngine.
+        Inicializa el DecisionEngine con un motor simbólico validado.
 
         Args:
-            symbolic_context (Optional[SymbolicEngine]): Contexto simbólico para razonamiento.
+            context (Optional[Any]): Contexto para inicializar SymbolicDecisionEngine si no se provee motor.
+            symbolic_context (Optional[SymbolicDecisionEngine]): Motor simbólico inyectado.
+        Raises:
+            TypeError: Si el motor simbólico no cumple la interfaz requerida.
+            ValueError: Si no se proporciona contexto o motor simbólico válido.
         """
-        if symbolic_context is not None:
-            # Verificar interfaz básica requerida en vez de instancia estricta
-            required_methods = ['decide', 'get_rule_by_action', 'update_rule', 'mutate_rules', 'save_rules']
-            if not all(callable(getattr(symbolic_context, method, None)) for method in required_methods):
-                raise TypeError("symbolic_context debe implementar la interfaz requerida de SymbolicEngine o ser None.")
-        self.engine = symbolic_context or SymbolicEngine()
-        logger.info("[🧠 DecisionEngine] Inicializado con contexto simbólico.")
+        required_methods = ['decide', 'get_rule_by_action', 'update_rule', 'mutate_rules', 'save_rules']
 
-    def decide(self, context: Any) -> Any:
-        if context is None:
-            raise ValueError("El contexto para decidir no puede ser None.")
-        logger.debug("[🧠 DecisionEngine] Analizando contexto para tomar decisión...")
+        if symbolic_context is not None:
+            if not all(callable(getattr(symbolic_context, m, None)) for m in required_methods):
+                raise TypeError("[DecisionEngine] El motor simbólico no cumple con la interfaz requerida.")
+            self.engine = symbolic_context
+        else:
+            if context is None:
+                raise ValueError("[DecisionEngine] Se requiere un contexto válido para inicializar SymbolicDecisionEngine.")
+            self.engine = SymbolicDecisionEngine(context)
+
+        self.logger.info("[✅ DecisionEngine] Inicializado con SymbolicDecisionEngine validado.")
+
+    @property
+    def symbolic_engine(self) -> SymbolicDecisionEngine:
+        """
+        Propiedad para acceder al motor simbólico internamente.
+
+        Returns:
+            SymbolicDecisionEngine: Motor simbólico acoplado.
+        """
+        return self.engine
+
+    def decide(self) -> Any:
+        """
+        Ejecuta el proceso de decisión usando el motor simbólico integrado.
+
+        Returns:
+            dict: Acción decidida con metadatos.
+        Raises:
+            RuntimeError: Si falla la ejecución del motor simbólico.
+        """
+        self.logger.debug("[🧠 DecisionEngine] Ejecutando decisión...")
         try:
-            action = self.engine.decide(context)
-            logger.info(f"[🧠 DecisionEngine] Acción decidida: {action}")
+            action = self.engine.decide()
+            self.logger.info(f"[🧠 DecisionEngine] Acción decidida: {action}")
             return action
         except Exception as e:
-            logger.error(f"[ERROR] Fallo en DecisionEngine.decide: {e}")
-            raise RuntimeError(f"Fallo en DecisionEngine.decide: {e}")
+            self.logger.error(f"[❌ DecisionEngine] Error al decidir: {e}")
+            raise RuntimeError(f"Fallo crítico en decisión: {e}")
 
     def update(self, action: Any, reward: float) -> None:
+        """
+        Actualiza el sistema con una action y recompensa recibida.
+
+        Args:
+            action (Any): Acción tomada.
+            reward (float): Recompensa obtenida.
+        Raises:
+            ValueError: Si la recompensa no es numérica.
+            RuntimeError: Si falla la actualización en el motor simbólico.
+        """
         if not isinstance(reward, (int, float)):
-            raise ValueError("La recompensa debe ser un número.")
-        logger.debug(f"[🧠 DecisionEngine] Actualizando motor con acción {action} y recompensa {reward}")
+            raise ValueError("[DecisionEngine] Recompensa debe ser numérica.")
+
+        self.logger.debug(f"[🧠 DecisionEngine] Actualizando con action={action} y reward={reward}")
         try:
             rule = self.engine.get_rule_by_action(action)
             if rule:
                 self.engine.update_rule(rule, reward)
-                logger.info(f"[🧠 DecisionEngine] Regla actualizada con recompensa {reward}")
+                self.logger.info(f"[🧠 DecisionEngine] Regla actualizada con recompensa {reward}")
             else:
-                logger.warning("[🧠 DecisionEngine] No se encontró regla para la acción proporcionada.")
+                self.logger.warning("[⚠️ DecisionEngine] No se encontró regla para la action proporcionada.")
         except Exception as e:
-            logger.error(f"[ERROR] Fallo en DecisionEngine.update: {e}")
-            raise RuntimeError(f"Fallo en DecisionEngine.update: {e}")
+            self.logger.error(f"[❌ DecisionEngine] Error en update: {e}")
+            raise RuntimeError(f"Error en actualización de decisión: {e}")
 
     def mutate(self) -> None:
-        logger.debug("[🧠 DecisionEngine] Ejecutando mutación de reglas.")
+        """
+        Ejecuta una mutación de reglas simbólicas dentro del motor.
+
+        Raises:
+            RuntimeError: Si falla la mutación.
+        """
+        self.logger.debug("[🧬 DecisionEngine] Ejecutando mutación simbólica.")
         try:
             self.engine.mutate_rules()
-            logger.info("[🧠 DecisionEngine] Mutación ejecutada exitosamente.")
+            self.logger.info("[🧬 DecisionEngine] Mutación completada con éxito.")
         except Exception as e:
-            logger.error(f"[ERROR] Fallo en DecisionEngine.mutate: {e}")
-            raise RuntimeError(f"Fallo en DecisionEngine.mutate: {e}")
+            self.logger.error(f"[❌ DecisionEngine] Error durante mutación: {e}")
+            raise RuntimeError(f"Fallo en mutación de reglas: {e}")
 
     def save(self) -> None:
-        logger.debug("[🧠 DecisionEngine] Guardando reglas simbólicas.")
+        """
+        Persiste el state simbólico del sistema.
+
+        Raises:
+            RuntimeError: Si ocurre un error al guardar.
+        """
+        self.logger.debug("[💾 DecisionEngine] Guardando reglas simbólicas.")
         try:
             self.engine.save_rules()
-            logger.info("[🧠 DecisionEngine] Reglas guardadas exitosamente.")
+            self.logger.info("[💾 DecisionEngine] Reglas persistidas correctamente.")
         except Exception as e:
-            logger.error(f"[ERROR] Fallo en DecisionEngine.save: {e}")
-            raise RuntimeError(f"Fallo en DecisionEngine.save: {e}")
+            self.logger.error(f"[❌ DecisionEngine] Error al guardar reglas: {e}")
+            raise RuntimeError(f"Error al persistir reglas simbólicas: {e}")

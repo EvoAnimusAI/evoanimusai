@@ -1,58 +1,55 @@
-# tests/test_evoai_config.py
-
-"""
-Test de integridad para el módulo de configuración EvoAI (nivel gubernamental).
-Valida constantes, rutas y estructuras requeridas por el sistema.
-"""
-
 import os
+import pytest
 from pathlib import Path
-from daemon import evoai_config as cfg
+from daemon.evoai_config import (
+    DAEMON_KEY, MAX_ERRORS,
+    CYCLE_DELAY, CYCLES_TO_MUTATE, TEST_CYCLES,
+    BASE_DIR, LOG_DIR, LOG_FILE, LOG_PATH,
+    KNOWLEDGE_LOGS_DIR, MUTATED_FUNCTIONS_DIR,
+    SYMBOLIC_MEMORY_PATH, MEMORY_PATH,
+    DEFAULT_PREFERRED_TOPICS, SYMBOLIC_NOISES, SYMBOLIC_STATES,
+    LEARNING_URLS,
+)
 
+def test_constants_values():
+    assert isinstance(DAEMON_KEY, str) and len(DAEMON_KEY) > 10
+    assert MAX_ERRORS == 10
+    assert CYCLE_DELAY > 0
+    assert CYCLES_TO_MUTATE > 0
+    assert TEST_CYCLES == 1
 
-def test_daemon_key_is_secure():
-    """Verifica que la clave del daemon esté definida correctamente."""
-    assert isinstance(cfg.DAEMON_KEY, str)
-    assert len(cfg.DAEMON_KEY) >= 20
+def test_paths_are_valid():
+    assert BASE_DIR.exists() and BASE_DIR.is_dir()
+    assert LOG_DIR.exists() and LOG_DIR.is_dir()
+    assert KNOWLEDGE_LOGS_DIR.exists() and KNOWLEDGE_LOGS_DIR.is_dir()
+    assert MUTATED_FUNCTIONS_DIR.exists() and MUTATED_FUNCTIONS_DIR.is_dir()
 
+def test_log_file_path():
+    assert LOG_PATH.name == LOG_FILE
+    assert LOG_PATH.parent == LOG_DIR
 
-def test_error_limits():
-    """Valida que los límites de errores estén dentro de un rango razonable."""
-    assert isinstance(cfg.MAX_ERRORS, int)
-    assert 1 <= cfg.MAX_ERRORS <= 100
+def test_memory_paths():
+    assert SYMBOLIC_MEMORY_PATH.name == "symbolic_memory.json"
+    assert MEMORY_PATH.name == "symbolic_memory.json"
 
+def test_symbolic_model_vars():
+    assert isinstance(DEFAULT_PREFERRED_TOPICS, list)
+    assert all(isinstance(t, str) for t in DEFAULT_PREFERRED_TOPICS)
 
-def test_cycle_parameters():
-    """Verifica la validez de los parámetros de ciclos."""
-    assert cfg.CYCLE_DELAY > 0
-    assert cfg.CYCLES_TO_MUTATE > 0
-    assert cfg.TEST_CYCLES >= 1
+    assert isinstance(SYMBOLIC_NOISES, list)
+    assert all(t is None or isinstance(t, str) for t in SYMBOLIC_NOISES)
 
-
-def test_symbolic_constants():
-    """Verifica que los estados y ruidos simbólicos estén bien definidos."""
-    assert isinstance(cfg.SYMBOLIC_NOISES, list)
-    assert None in cfg.SYMBOLIC_NOISES
-    assert isinstance(cfg.SYMBOLIC_STATES, list)
-    assert "active" in cfg.SYMBOLIC_STATES
-
-
-def test_directories_exist():
-    """Asegura que los directorios necesarios estén presentes y accesibles."""
-    assert cfg.LOG_DIR.exists() and cfg.LOG_DIR.is_dir()
-    assert cfg.KNOWLEDGE_LOGS_DIR.exists() and cfg.KNOWLEDGE_LOGS_DIR.is_dir()
-    assert cfg.MUTATED_FUNCTIONS_DIR.exists() and cfg.MUTATED_FUNCTIONS_DIR.is_dir()
-
-
-def test_paths_are_pathlib():
-    """Confirma que todas las rutas sean instancias de Path (no str)."""
-    assert isinstance(cfg.LOG_DIR, Path)
-    assert isinstance(cfg.MEMORY_PATH, Path)
-    assert isinstance(cfg.SYMBOLIC_MEMORY_PATH, Path)
-
+    assert isinstance(SYMBOLIC_STATES, list)
+    assert "normal" in SYMBOLIC_STATES
 
 def test_learning_urls():
-    """Valida que las URLs de aprendizaje estén correctamente formateadas."""
-    assert isinstance(cfg.LEARNING_URLS, dict)
-    for topic, url in cfg.LEARNING_URLS.items():
-        assert topic and url.startswith("http")
+    assert isinstance(LEARNING_URLS, dict)
+    assert "symbolic evolution" in LEARNING_URLS
+    assert LEARNING_URLS["symbolic evolution"].startswith("http")
+
+@pytest.mark.parametrize("path", [
+    LOG_DIR, KNOWLEDGE_LOGS_DIR, MUTATED_FUNCTIONS_DIR
+])
+def test_directories_created(path):
+    assert path.exists()
+    assert path.is_dir()

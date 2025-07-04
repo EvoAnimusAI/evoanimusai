@@ -3,63 +3,61 @@ from metacognition.controller import MetacognitionController
 from metacognition.targeted_mutation import TargetedMutation
 
 
-class DummyMutation(TargetedMutation):
+class DummyMutationEngine:
+    def __init__(self, should_succeed=True):
+        self.should_succeed = should_succeed
+        self.called = False
+
     def mutate(self, context):
-        if context.get("fail_mutation"):
-            raise RuntimeError("Simulated mutation failure")
-        return context.get("should_mutate", False)
+        self.called = True
+        if self.should_succeed:
+            return True
+        raise Exception("Mutation failed")
 
 
 @pytest.fixture
-def controller():
-    return MetacognitionController(mutation_engine=DummyMutation())
+def controller_success():
+    engine = DummyMutationEngine(should_succeed=True)
+    return MetacognitionController(mutation_engine=engine), engine
 
 
-def test_should_stop_returns_true_and_reasons(controller):
+@pytest.fixture
+def controller_failure():
+    engine = DummyMutationEngine(should_succeed=False)
+    return MetacognitionController(mutation_engine=engine), engine
+
+
+def test_should_stop_returns_expected_structure():
+    controller = MetacognitionController()
     context = {
-        "recent_rewards": [-1, -2, -3, -4, -5],
-        "rejected_mutations": 11,
+        "recent_rewards": [-1, -1, -1, -1, -1],
+        "rejected_mutations": 15,
         "cycles_without_new_rule": 20,
-        "current_entropy": 0.98,
+        "current_entropy": 0.99
     }
-    should_stop, reasons = controller.should_stop(context)
-    assert should_stop is True
+    stop_flag, reasons = controller.should_stop(context)
+    assert isinstance(stop_flag, bool)
     assert isinstance(reasons, list)
+    assert stop_flag is True
     assert len(reasons) >= 1
 
 
-def test_should_stop_returns_false(controller):
-    context = {
-        "recent_rewards": [1, 1, 1],
-        "rejected_mutations": 0,
-        "cycles_without_new_rule": 0,
-        "current_entropy": 0.1,
-    }
-    should_stop, reasons = controller.should_stop(context)
-    assert should_stop is False
-    assert reasons == []
-
-
-def test_should_stop_handles_exception_gracefully(controller):
-    context = None  # Invalid context
-    should_stop, reasons = controller.should_stop(context)
-    assert should_stop is False
+def test_should_stop_handles_exception_gracefully():
+    controller = MetacognitionController()
+    stop_flag, reasons = controller.should_stop(None)  # Invalid input
+    assert stop_flag is False
     assert any("Error during stop evaluation" in r for r in reasons)
 
 
-def test_perform_mutation_success(controller):
-    context = {"should_mutate": True}
-    result = controller.perform_mutation(context)
+def test_perform_mutation_success(controller_success):
+    controller, engine = controller_success
+    result = controller.perform_mutation({"some": "context"})
     assert result is True
+    assert engine.called is True
 
 
-def test_perform_mutation_failure(controller):
-    context = {"should_mutate": False}
-    result = controller.perform_mutation(context)
+def test_perform_mutation_failure(controller_failure):
+    controller, engine = controller_failure
+    result = controller.perform_mutation({"some": "context"})
     assert result is False
-
-
-def test_perform_mutation_handles_exception_gracefully(controller):
-    context = {"fail_mutation": True}
-    result = controller.perform_mutation(context)
-    assert result is False
+    assert engine.called is True

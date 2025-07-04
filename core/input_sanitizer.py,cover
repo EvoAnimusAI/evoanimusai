@@ -1,0 +1,50 @@
+  # core/input_sanitizer.py
+  # -*- coding: utf-8 -*-
+> """
+> Módulo de saneamiento y validación de observaciones de entrada
+> Nivel: Militar / Gubernamental / Científico
+  
+> Garantiza integridad y validez de variables críticas
+> antes de ser procesadas por el motor de decisiones EvoAI.
+  
+> Fecha: 2025-07-02
+> Autor: Equipo EvoAI
+> """
+  
+! import logging
+  
+! logger = logging.getLogger(__name__)
+  
+! class InputSanitizer:
+!     """
+!     Clase para validar y sanear variables críticas en observaciones entrantes.
+!     """
+  
+!     def __init__(self, defaults=None):
+!         """
+!         Inicializa con valores por defecto configurables.
+!         """
+!         self.defaults = defaults or {
+!             'noise': 'calm',
+!             'state': 'unknown',
+!             'pos': 0
+!         }
+  
+!     def sanitize(self, observation: dict) -> dict:
+!         """
+!         Valida y corrige las variables críticas de la observación.
+  
+!         Parámetros:
+!             observation (dict): Datos de entrada sin procesar.
+  
+!         Retorna:
+!             dict: Datos saneados con valores garantizados.
+!         """
+!         sanitized = observation.copy()
+!         for key, default_value in self.defaults.items():
+!             if key not in sanitized or sanitized[key] is None:
+!                 logger.warning(
+!                     f"[FALLBACK] Variable '{key}' era None o no definida, asignado valor por defecto: {default_value}"
+!                 )
+!                 sanitized[key] = default_value
+!         return sanitized

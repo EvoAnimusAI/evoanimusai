@@ -1,13 +1,15 @@
 # evoai_bootstrap.py
+# -*- coding: utf-8 -*-
 
 import os
 import datetime
+
 from symbolic_ai.symbolic_rule import SymbolicRule
 from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine
 from symbolic_ai.symbolic_context import SymbolicContext
 
 from utils.logger import log  # Logging unificado obligatorio
-from utils.default_rules import get_default_rules  # Carga opcional de reglas base
+from utils.default_symbolic_rules import get_default_symbolic_rules  # Reglas simbólicas por defecto
 
 
 def bootstrap_evoai(context_data: dict = None, custom_rules: list[str] = None):
@@ -26,41 +28,51 @@ def bootstrap_evoai(context_data: dict = None, custom_rules: list[str] = None):
         TypeError: Si context_data no es dict.
     """
     log("[🚀 Bootstrap] Inicializando entorno EvoAI...", level="INFO")
+    print("[🟢] Iniciando bootstrap EvoAI...")
 
     if context_data and not isinstance(context_data, dict):
         raise TypeError(f"Contexto inválido: se esperaba dict, se recibió {type(context_data).__name__}")
 
     context = SymbolicContext()
     if context_data:
-        # Insertar cada clave-valor como un dict independiente en la historia para que el __getitem__ funcione correctamente
         for key, value in context_data.items():
             context.history.append({key: value})
+        print(f"[📥 CONTEXTO INICIAL] {context_data}")
 
     engine = SymbolicRuleEngine(auto_load=True)
+    print("[⚙️] Motor de reglas cargado.")
 
-    if custom_rules:
-        if not all(isinstance(rule, str) for rule in custom_rules):
-            raise ValueError("Todas las reglas personalizadas deben ser strings simbólicos.")
+    if not custom_rules:
+        print("[ℹ️] No se especificaron reglas personalizadas. Cargando reglas por defecto.")
+        custom_rules = get_default_symbolic_rules()
 
-        # Validar formato estricto: debe contener '=>'
-        formatted_rules = []
-        for rule in custom_rules:
-            if "=>" not in rule:
-                raise ValueError(
-                    f"Regla inválida, debe contener '=>'. Formato esperado: 'rol:valor => accion :: condicion'. Regla: {rule}"
-                )
-            formatted_rules.append(rule)
+    if not all(isinstance(rule, str) for rule in custom_rules):
+        raise ValueError("Todas las reglas personalizadas deben ser strings simbólicos.")
 
-        for rule in formatted_rules:
-            engine.add_rule(rule)
+    formatted_rules = []
+    for rule in custom_rules:
+        if "=>" not in rule or "::" not in rule:
+            raise ValueError(f"Regla inválida: {rule}. Formato esperado: 'rol:valor => accion :: condicion'")
+        formatted_rules.append(rule)
 
-        # Guardar snapshot de reglas personalizadas
-        os.makedirs("data", exist_ok=True)
-        timestamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        file_path = f"data/symbolic_rules_snapshot_{timestamp}.json"
-        engine.save_to_file(file_path)
-        log(f"[📄 Bootstrap] Reglas personalizadas guardadas en: {file_path}", level="DEBUG")
+    for rule in formatted_rules:
+        print(f"[➕ REGLA] {rule}")
+        engine.add_rule(rule)
 
+    os.makedirs("data", exist_ok=True)
+    timestamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    file_path = f"data/symbolic_rules_snapshot_{timestamp}.json"
+    engine.save_to_file(file_path)
+    log(f"[📄 Bootstrap] Reglas guardadas en: {file_path}", level="DEBUG")
+    print(f"[💾 SNAPSHOT] Guardado en {file_path}")
+
+    total_reglas = sum(len(rules) for rules in engine.rules.values())
+    print(f"[✅] Motor simbólico listo con {total_reglas} reglas.")
+    print(f"[📊 REGLAS ACTIVAS]")
+    for rol, rules in engine.rules.items():
+        print(f"   - {rol}: {len(rules)} reglas")
+
+    print(f"[📦 CONTEXTO FINAL] {context.values}")
     log(f"[✅ Bootstrap] Motor listo con {len(engine.rules)} reglas activas.", level="INFO")
     log(f"[📊 Contexto] Valores iniciales: {context.values}", level="DEBUG")
 

@@ -1,0 +1,145 @@
+  # core/engine.py
+  # -*- coding: utf-8 -*-
+> """
+> Motor heurístico EvoAnimusAI — Nivel Militar / Gubernamental / Ultra-secreto
+> ---------------------------------------------------------------
+> - Decisión heurística basada en reglas definidas
+> - Mutación simple de prioridades
+> - Sin razonamiento simbólico estructurado
+> - No confundir con el motor simbólico oficial (SymbolicDecisionEngine)
+> """
+  
+! import logging
+! import random
+! from typing import Any, Dict, List, Optional
+  
+! from utils.default_rules import get_default_rules
+! from symbolic_ai.symbolic_learning_engine import SymbolicLearningEngine
+! from symbolic_ai.symbolic_entropy_controller import SymbolicEntropyController
+  
+! logger = logging.getLogger("EvoAI.Engine")
+! logger.setLevel(logging.INFO)
+  
+! class RuleEngineAdapter:
+!     def __init__(self, rules: List[Dict[str, Any]]) -> None:
+!         self.rules = rules
+  
+!     def evaluate(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+          # Evaluación heurística simple. No usar como motor simbólico.
+!         return [
+!             {
+!                 "action": r.get("action", "noop"),
+!                 "priority": r.get("priority", 0.5),
+!                 "confidence": r.get("priority", 0.5),  # Asumimos confianza = prioridad
+!             }
+!             for r in self.rules
+!         ]
+  
+!     def add_rule(self, rule: Dict[str, Any]) -> None:
+!         if isinstance(rule, dict):
+!             self.rules.append(rule)
+  
+!     def remove_rule(self, rule: Dict[str, Any]) -> None:
+!         self.rules = [r for r in self.rules if r.get("action") != rule.get("action")]
+  
+  
+! class EvoAIEngine:
+!     """
+!     Motor heurístico EvoAI. No confundir con motor simbólico oficial.
+!     Su uso está reservado para evaluación de reglas predefinidas.
+!     """
+!     def __init__(self, rules: Optional[List[Dict[str, Any]]] = None) -> None:
+!         try:
+!             self.rules = rules if rules is not None else get_default_rules()
+!             self.context: Dict[str, Any] = {}
+!             self.learning_engine = SymbolicLearningEngine(RuleEngineAdapter(self.rules))
+!             self.entropy_controller = SymbolicEntropyController()
+!             logger.info(f"[Init] Motor heurístico inicializado con {len(self.rules)} reglas.")
+!         except Exception as e:
+!             logger.exception("[Init] Falla crítica al inicializar motor heurístico.")
+!             raise RuntimeError("Motor heurístico falló al iniciar.") from e
+  
+!     def heuristic_decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
+!         """
+!         Método de decisión heurística. NO utilizar como motor simbólico.
+!         """
+!         if not isinstance(context, dict):
+!             logger.error("[heuristic_decide] Contexto no válido (no es dict).")
+!             raise TypeError("Contexto inválido.")
+  
+!         self.context = context
+  
+!         entropy_value = context.get("entropy", 0.0)
+!         self.entropy_controller.update_entropy(entropy_value)
+  
+!         if self.entropy_controller.requires_halt():
+!             recovery = self.entropy_controller.get_recovery_action()
+!             logger.warning(f"[heuristic_decide] Entropía crítica. Acción correctiva: {recovery}")
+!             self.entropy_controller.reduce_entropy()
+!             return {"action": recovery, "priority": 1.0, "source": "entropy_recovery"}
+  
+!         candidates = self.learning_engine.rule_engine.evaluate(context)
+!         if not candidates:
+!             logger.warning("[heuristic_decide] Sin reglas disponibles. Acción por defecto.")
+!             return {"action": "wait", "priority": 0.0, "source": "default"}
+  
+!         prioritized = self.prioritize(candidates)
+!         decision = prioritized[0]
+!         logger.info(f"[heuristic_decide] Acción seleccionada: {decision}")
+!         return decision
+  
+!     def mutate_rules(self) -> None:
+!         if not self.rules:
+!             logger.warning("[mutate_rules] No hay reglas para mutar.")
+!             return
+  
+!         rule = random.choice(self.rules)
+!         old_priority = rule.get("priority", 0.5)
+!         delta = round(random.uniform(-0.2, 0.2), 4)
+!         new_priority = round(min(1.0, max(0.0, old_priority + delta)), 4)
+!         rule["priority"] = new_priority
+  
+!         logger.info(f"[mutate_rules] Regla '{rule.get('action')}' prioridad {old_priority} → {new_priority}")
+  
+!     def learn(self, observation: Dict[str, Any], action: str, reward: float) -> None:
+!         logger.info(f"[learn] Aprendiendo de action '{action}' con recompensa {reward}")
+!         self.learning_engine.reinforce(action, reward)
+!         self.entropy_controller.update_entropy_change(reward)
+  
+!     def save_rules(self) -> None:
+!         logger.info("[save_rules] Reglas heurísticas guardadas (simulado).")
+  
+!     def get_rule_by_action(self, action: str) -> Optional[Dict[str, Any]]:
+!         return next((r for r in self.rules if r.get("action") == action), None)
+  
+!     def update_rule(self, new_rule: Dict[str, Any], reward: Optional[float] = None) -> None:
+!         if "action" not in new_rule:
+!             logger.error("[update_rule] Falta clave 'action'.")
+!             raise ValueError("Se requiere 'action' en la regla.")
+  
+!         for i, rule in enumerate(self.rules):
+!             if rule.get("action") == new_rule["action"]:
+!                 logger.debug(f"[update_rule] Regla antes: {rule}")
+!                 self.rules[i].update(new_rule)
+  
+!                 if reward is not None:
+!                     old = rule.get("priority", 0.5)
+!                     alpha = new_rule.get("alpha", 0.1)
+!                     adjusted = round(old + alpha * (reward - old), 4)
+!                     self.rules[i]["priority"] = min(1.0, max(0.0, adjusted))
+!                     logger.info(f"[update_rule] Prioridad ajustada: {old} → {self.rules[i]['priority']}")
+  
+!                 self._validate_rule_consistency(self.rules[i])
+!                 return
+  
+!         logger.warning(f"[update_rule] Regla no encontrada: {new_rule['action']}")
+  
+!     def _validate_rule_consistency(self, rule: Dict[str, Any]) -> None:
+!         if not isinstance(rule.get("action"), str):
+!             logger.warning(f"[validate_rule] Acción inválida: {rule}")
+!         p = rule.get("priority")
+!         if not isinstance(p, (int, float)) or not (0 <= p <= 1):
+!             logger.warning(f"[validate_rule] Prioridad fuera de rango: {rule}")
+  
+!     def prioritize(self, rule_outputs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+!         return sorted(rule_outputs, key=lambda r: r.get("confidence", 0.0), reverse=True)

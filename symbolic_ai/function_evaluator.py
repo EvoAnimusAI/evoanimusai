@@ -1,36 +1,53 @@
 # symbolic_ai/function_evaluator.py
+# -*- coding: utf-8 -*-
+"""
+Evaluador de Funciones Mutadas — Nivel gubernamental, científico y militar.
+-------------------------------------------------------------------------------
+Evalúa funciones simbólicas mutadas dentro de un contexto controlado,
+con validaciones estrictas, trazabilidad y tolerancia a fallos.
+
+Autor: Daniel Santiago Ospina Vel
+"""
 
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Optional, Callable
 
 logger = logging.getLogger(__name__)
 
 def evaluate_mutated_function(
-    function: Callable[..., Any],
+    function: Any,
     context: Optional[dict] = None
 ) -> Any:
     """
-    Evaluates a mutated function within an optional context.
+    Evalúa una función mutada dentro de un contexto opcional.
 
     Args:
-        function (Callable): The mutated function to evaluate.
-        context (Optional[dict]): Optional context to pass to the function.
+        function: Función o callable mutado a evaluar.
+        context: Contexto opcional a pasar a la función.
 
     Returns:
-        Any: The result of the function evaluation, or None if an error occurred.
+        Resultado de la evaluación, o None si ocurre un error.
 
-    Logs detailed info for auditability and debugging.
+    Maneja errores, valida callability y registra trazabilidad detallada.
     """
-    logger.info(f"Evaluating mutated function: {function}")
+    logger.info(f"[EVALUADOR] Iniciando evaluación de función mutada: {function}")
+
+    # Validación estricta: callable o método __call__
+    if not callable(function):
+        if hasattr(function, '__call__') and callable(getattr(function, '__call__')):
+            logger.warning(f"[EVALUADOR] Objeto no callable directo, pero posee __call__. Se utilizará.")
+            function_callable: Callable = getattr(function, '__call__')
+        else:
+            logger.error(f"[EVALUADOR] El objeto NO es callable ni implementa __call__: {function}. Evaluación cancelada.")
+            return None
+    else:
+        function_callable = function
 
     try:
-        if context is not None:
-            result = function(context)
-        else:
-            result = function()
-        logger.info(f"Evaluation successful. Result: {result}")
+        result = function_callable(context) if context is not None else function_callable()
+        logger.info(f"[EVALUADOR] Evaluación exitosa. Resultado: {result}")
         return result
 
     except Exception as e:
-        logger.error(f"Error while evaluating function: {e}", exc_info=True)
+        logger.error(f"[EVALUADOR] Error durante la evaluación: {e}", exc_info=True)
         return None

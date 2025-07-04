@@ -1,0 +1,11 @@
+{
+  "app_name": "EvoAnimusAI",
+  "version": "1.0.0",
+  "debug": false,
+  "database_url": "sqlite:///evoai.db",
+  "max_workers": 4,
+  "timeout_seconds": 30,
+  "symbolic_memory_path": "data/symbolic_memory.json",
+  "mutated_functions_path": "data/mutated_functions/",
+  "logs_path": "logs/"
+}
