@@ -11,13 +11,16 @@ EvoAIEngine — Núcleo heurístico de EvoAnimusAI
 import logging
 import random
 import re
+import json
+from datetime import datetime
 from typing import Any, Dict, List
 
 from utils.default_rules import get_default_rules
 from symbolic_ai.symbolic_learning_engine import SymbolicLearningEngine
 from symbolic_ai.symbolic_entropy_controller import SymbolicEntropyController
 from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine
-from metacognition.metacognitive_supervisor import MetacognitiveSupervisor  # ✅ Integrado
+from metacognition.metacognitive_supervisor import MetacognitiveSupervisor
+from ser_vivo import ConcienciaSimulada  # 🔗 Integración simbiótica
 
 logger = logging.getLogger("EvoAI.Engine")
 logger.setLevel(logging.INFO)
@@ -82,7 +85,9 @@ class EvoAIEngine:
         self.adapter = RuleEngineAdapter(self.rules)
         self.learning_engine = SymbolicLearningEngine(self.adapter)
         self.entropy_controller = SymbolicEntropyController(entropy=0.0)
-        self.metacog = MetacognitiveSupervisor(error_threshold=0.8, stagnation_limit=20)  # ✅ Militar
+        self.metacog = MetacognitiveSupervisor(error_threshold=0.8, stagnation_limit=20)
+        self.conciencia = ConcienciaSimulada()
+        print("[🧠 SER_VIVO] ConcienciaSimulada inicializada correctamente.")
         print(f"[INFO] [INIT] Motor heurístico inicializado con {len(self.rules)} reglas.")
 
     def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -104,12 +109,25 @@ class EvoAIEngine:
             print("[🚨 HALT] Entropía excedida. Decisión: HALT")
             return {"action": "halt"}
 
-        evaluated = self.adapter.evaluate(context)
+        entrada_simbolica = context.get("input", "Sin entrada explícita")
+        print(f"[🧠 SER_VIVO] Ciclo simbólico activado con entrada: {entrada_simbolica}")
+        try:
+            self.conciencia.ciclo(entrada_simbolica)
+        except Exception as e:
+            print(f"[❌ ERROR][SER_VIVO] Fallo en ConcienciaSimulada: {e}")
 
+        evaluated = self.adapter.evaluate(context)
         if evaluated:
             selected = evaluated[0]
-            print(f"[✅ SELECTED] Acción seleccionada: {selected.get('action')}")
-            return {"action": selected.get("action", "wait")}
+            accion = selected.get("action", "wait")
+            print(f"[✅ SELECTED] Acción seleccionada: {accion}")
+            recompensa = context.get("reward", 0.0)
+            try:
+                self.learn(context, accion, recompensa)
+            except Exception as e:
+                print(f"[❌ ERROR] Fallo durante aprendizaje: {e}")
+            print(f"[🔄 CYCLE STATS] Ciclo: {context.get('cycle')} | Total reglas simbólicas: {len(self.learning_engine.generated_rules)}")
+            return {"action": accion}
         else:
             print("[⚠️ DEFAULT ACTION] Acción: wait")
             return {"action": "wait"}
@@ -120,10 +138,28 @@ class EvoAIEngine:
             self.learning_engine.update_rule(action, reward)
         except Exception as e:
             print(f"[❌ ERROR] Fallo en aprendizaje simbólico: {e}")
-
         try:
             self.entropy_controller.update_entropy_change(reward)
         except AttributeError as e:
             print(f"[❌ ERROR] Faltante método 'update_entropy_change': {e}")
         except Exception as e:
             print(f"[❌ ERROR] Fallo en controlador de entropía: {e}")
+
+    def boot(self) -> None:
+        print("[🧠 BOOT] Ejecutando boot() simbólico para auditoría de trazabilidad...")
+        boot_info = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "rules_loaded": len(self.rules),
+            "entropy": self.entropy_controller.entropy,
+            "ser_vivo": True,
+            "metacognition": {
+                "error_threshold": self.metacog.error_threshold,
+                "stagnation_limit": self.metacog.stagnation_limit
+            }
+        }
+        try:
+            with open("data/boot_log.json", "w") as f:
+                json.dump(boot_info, f, indent=4)
+            print("[✅ BOOT] boot_log.json guardado correctamente.")
+        except Exception as e:
+            print(f"[❌ ERROR] No se pudo guardar boot_log.json: {e}")

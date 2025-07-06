@@ -1,0 +1,28 @@
+{
+  "rules": [
+    {
+      "rol": "action",
+      "valor": "explore",
+      "accion": "move_forward",
+      "condicion": "noise == 'calm'",
+      "texto": "⟦action:explore⟧ ⇒ move_forward :: noise == 'calm'",
+      "confidence": 1.0
+    },
+    {
+      "rol": "action",
+      "valor": "rest",
+      "accion": "pause",
+      "condicion": "noise == 'chaos'",
+      "texto": "⟦action:rest⟧ ⇒ pause :: noise == 'chaos'",
+      "confidence": 1.0
+    },
+    {
+      "rol": "state",
+      "valor": "active",
+      "accion": "explore",
+      "condicion": "pos >= 0",
+      "texto": "⟦state:active⟧ ⇒ explore :: pos >= 0",
+      "confidence": 1.0
+    }
+  ]
+}

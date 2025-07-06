@@ -1,0 +1,15 @@
+[Unit]
+Description=EvoAI HALT Server — Visualización Cibernética de HALTs
+After=network.target
+
+[Service]
+Type=simple
+User=%u
+WorkingDirectory=%h/evoai22
+ExecStart=%h/evoai_env311/bin/python3 %h/evoai22/tools/halt_server.py
+Restart=always
+StandardOutput=append:%h/evoai22/logs/halt_server_output.log
+StandardError=append:%h/evoai22/logs/halt_server_error.log
+
+[Install]
+WantedBy=default.target

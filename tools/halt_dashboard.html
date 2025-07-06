@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🛡️ HALT Dashboard — EvoAI</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .alerta {
+            background-color: #550000;
+            border-left: 5px solid red;
+            padding: 10px;
+            margin: 20px 0;
+            animation: parpadeo 1s infinite alternate;
+        }
+        @keyframes parpadeo {
+            0% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        canvas {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        pre {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 6px 12px;
+            background-color: #2e7d32;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        select {
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-bar">
+        <h2>🛡️ <span style="color: #ff4444">HALT Dashboard — EvoAI</span></h2>
+        <button onclick="exportarGrafico()">💾 Exportar PNG</button>
+    </div>
+
+    <canvas id="chart" width="400" height="180"></canvas>
+
+    <div id="alertas"></div>
+
+    <h3>📊 Métricas Brutas</h3>
+    <pre id="datos_brutos">Cargando...</pre>
+
+    <script>
+        let chartRef;
+
+        async function cargarDatos() {
+            const res = await fetch("/metrics");
+            const data = await res.json();
+
+            document.getElementById("datos_brutos").textContent = JSON.stringify(data, null, 4);
+
+            const alertasHTML = data.alertas.map(a =>
+                `<div class='alerta'>⚠️ Ciclo <b>${a.ciclo}</b>: Entropía elevada (${a.entropia})</div>`
+            ).join("");
+            document.getElementById("alertas").innerHTML = alertasHTML;
+
+            const ciclos = Object.keys(data.por_ciclo).map(c => parseInt(c));
+            const error_rates = data.por_error;
+            const entropias = data.alertas.map(a => a.entropia);
+
+            const ctx = document.getElementById('chart').getContext('2d');
+            if (chartRef) chartRef.destroy();
+
+            chartRef = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ciclos,
+                    datasets: [
+                        {
+                            label: '📉 Entropía Máx.',
+                            data: entropias,
+                            borderColor: 'cyan',
+                            backgroundColor: 'rgba(0,255,255,0.2)',
+                            tension: 0.3
+                        },
+                        {
+                            label: '❌ Tasa de Error',
+                            data: error_rates,
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255,0,0,0.2)',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 700
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' }
+                        },
+                        y: {
+                            ticks: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportarGrafico() {
+            const link = document.createElement('a');
+            link.download = 'halt_dashboard.png';
+            link.href = chartRef.toBase64Image();
+            link.click();
+        }
+
+        setInterval(cargarDatos, 10000);
+        cargarDatos();
+    </script>
+</body>
+</html>

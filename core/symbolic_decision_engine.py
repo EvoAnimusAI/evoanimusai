@@ -14,7 +14,6 @@ from symbolic_ai.symbolic_rule_engine import SymbolicRuleEngine, SymbolicRule
 
 logger = logging.getLogger("EvoAI.SymbolicDecisionEngine")
 
-
 class ToolManager:
     def initialize(self, verbose: bool = False) -> None:
         if verbose:
@@ -22,31 +21,25 @@ class ToolManager:
         print("[🛠️ INIT] ToolManager inicializado.")
         # Aquí podrían inicializarse herramientas futuras.
 
-
 class SymbolicDecisionEngine:
     def __init__(self, context: EvoContext, engine: Optional[SymbolicRuleEngine] = None) -> None:
         print("[🔧 INIT] Construyendo SymbolicDecisionEngine...")
         if not isinstance(context, EvoContext):
             raise TypeError("El contexto debe ser una instancia de EvoContext.")
-
         self.context = context
         self.engine = engine or SymbolicRuleEngine()
         self.last_decision = None
         self.tools = ToolManager()
-
         if not hasattr(self.engine, "evaluate") or not callable(getattr(self.engine, "evaluate")):
             raise AttributeError("[INIT] El motor simbólico proporcionado no implementa 'evaluate(context)'.")
-
         logger.info("[✅ SymbolicDecisionEngine] Inicializado con contexto, motor simbólico y herramientas auxiliares.")
         print("[✅ INIT] SymbolicDecisionEngine activo y listo.")
 
     def decide(self, context: Dict[str, Any]) -> Dict[str, Any]:
         logger.debug("[🧠] Iniciando evaluación simbólica con contexto externo...")
         print(f"\n[🧩 CONTEXTO ENTRANTE]: {context}")
-
         entropy = check_entropy(context)
         print(f"[🔢 ENTROPY CHECK]: {entropy}")
-
         if should_halt(entropy):
             logger.warning(f"[⚠️] Entropía crítica detectada ({entropy:.2f}). Acción: 'halt'.")
             print(f"[🛑 HALT] Entropía crítica ({entropy:.2f}). Acción inmediata: halt")
@@ -55,15 +48,10 @@ class SymbolicDecisionEngine:
                 "reason": "High symbolic entropy",
                 "entropy": entropy
             }
-
         try:
             self.log_context_facts()
-
-            # Evaluación simbólica
             rules = self.engine.evaluate(context)
             print(f"[📊 EVALUATE] Total reglas activadas: {len(rules)}")
-
-            # Priorización
             prioritized = self.prioritize_rules(rules)
             if not prioritized:
                 logger.warning("[❗] No se pudo priorizar ninguna action. Emitiendo 'noop'.")
@@ -73,18 +61,14 @@ class SymbolicDecisionEngine:
                     "reason": "No valid symbolic decision",
                     "entropy": entropy
                 }
-
             selected = prioritized[0].to_dict()
             selected["entropy"] = entropy
             selected["source"] = "symbolic_decision_engine"
-
             self.last_decision = selected
             self.audit_decision(selected)
-
             logger.info(f"[✅] Acción seleccionada: {selected}")
             print(f"[🧠 DECISIÓN] {selected}")
             return selected
-
         except Exception as e:
             logger.error(f"[❌] Fallo crítico en decide(): {e}", exc_info=True)
             print(f"[❌ EXCEPCIÓN EN DECIDE]: {e}")

@@ -28,29 +28,18 @@ class SecureSymbolicLogger:
         level: int = logging.INFO,
         encryption_key: Optional[bytes] = None,
     ):
-        """
-        Args:
-            log_file (str): Ruta de archivo log.
-            max_bytes (int): Tamaño máximo antes rotación.
-            backup_count (int): Número de backups para rotación.
-            level (int): Nivel mínimo para logging.
-            encryption_key (Optional[bytes]): Clave de 32 bytes para cifrado AES-GCM. None para sin cifrado.
-        """
         self.hostname = socket.gethostname()
         self.lock = threading.Lock()
         self.encryption_key = encryption_key
         self.aesgcm = AESGCM(encryption_key) if encryption_key else None
 
-        # Crear un logger único por instancia para evitar reuso de handlers
         self.logger = logging.getLogger(f"SecureSymbolicLogger_{id(self)}")
         self.logger.setLevel(level)
         self.logger.propagate = False
 
-        # Remover handlers previos si existieran
         for handler in list(self.logger.handlers):
             self.logger.removeHandler(handler)
 
-        # Configurar handler de rotación de archivos
         handler = RotatingFileHandler(
             filename=log_file,
             maxBytes=max_bytes,
@@ -70,17 +59,14 @@ class SecureSymbolicLogger:
         nonce = data[:12]
         ct = data[12:]
         plaintext = self.aesgcm.decrypt(nonce, ct, None)
-        # Extraer únicamente el campo "message" del JSON
         try:
             record = json.loads(plaintext.decode("utf-8"))
             msg = record.get("message", "")
             return msg.encode("utf-8")
         except Exception:
-            # Si algo falla, retorna el JSON completo desencriptado
             return plaintext
 
     def _compute_file_checksum(self, filename: str) -> str:
-        """SHA256 checksum para verificar integridad del archivo log."""
         sha256 = hashlib.sha256()
         try:
             with open(filename, "rb") as f:
@@ -92,7 +78,6 @@ class SecureSymbolicLogger:
             return ""
 
     def _fallback_log(self, msg: str) -> None:
-        """Fallback seguro en consola ante error crítico del logger."""
         print(f"[SecureSymbolicLogger ERROR] {msg}")
 
     def _build_record(
@@ -118,14 +103,6 @@ class SecureSymbolicLogger:
         level: int = logging.INFO,
         extra: Optional[Dict[str, Any]] = None
     ) -> None:
-        """
-        Registra un mensaje con nivel y contexto adicional.
-
-        Args:
-            message (str): Texto del log.
-            level (int): Nivel de logging estándar.
-            extra (dict): Campos adicionales para enriquecer el log.
-        """
         try:
             level_name = logging.getLevelName(level)
             with self.lock:
@@ -136,14 +113,11 @@ class SecureSymbolicLogger:
         except Exception as e:
             self._fallback_log(f"{e} — {traceback.format_exc()}")
 
+    # =============================
     # Métodos especializados
+    # =============================
 
-    def log_entry(
-        self,
-        agent: Optional[str],
-        environment: Optional[str],
-        cycle: Optional[int]
-    ) -> None:
+    def log_entry(self, agent: Optional[str], environment: Optional[str], cycle: Optional[int]) -> None:
         self.log(
             f"Ciclo {cycle if cycle is not None else '?'} iniciado",
             logging.INFO,
@@ -195,12 +169,7 @@ class SecureSymbolicLogger:
             {"type": "learning_event", "source": source, "insight": insight}
         )
 
-    def log_rewrite(
-        self,
-        name: str,
-        description: Optional[str] = None,
-        file_path: Optional[str] = None
-    ) -> None:
+    def log_rewrite(self, name: str, description: Optional[str] = None, file_path: Optional[str] = None) -> None:
         self.log(
             "Reescritura ejecutada",
             logging.INFO,
@@ -212,10 +181,20 @@ class SecureSymbolicLogger:
             }
         )
 
+    def log_event(self, event: Dict[str, Any]) -> None:
+        """
+        Logging genérico de eventos arbitrarios.
+        """
+        self.log(
+            message=event.get("message", "Evento simbólico"),
+            level=logging.INFO,
+            extra=event
+        )
 
-# ====================================
-# Exportación de funciones convenientes
-# ====================================
+
+# =============================
+# Exportación explícita
+# =============================
 
 secure_symbolic_logger = SecureSymbolicLogger()
 
@@ -226,3 +205,4 @@ log_synthesis = secure_symbolic_logger.log_synthesis
 log_concept   = secure_symbolic_logger.log_concept
 log_learning  = secure_symbolic_logger.log_learning
 log_rewrite   = secure_symbolic_logger.log_rewrite
+log_event     = secure_symbolic_logger.log_event

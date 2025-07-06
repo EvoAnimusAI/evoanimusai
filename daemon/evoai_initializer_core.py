@@ -21,6 +21,8 @@ from daemon.evoai_initializer_executor import initialize_executor
 from daemon.evoai_initializer_tools import initialize_support_tools
 from daemon.evoai_initializer_decision import initialize_decision
 
+from ser_vivo.conciencia_simulada import ConcienciaSimulada  # ✅ INTEGRACIÓN DIRECTA
+
 logger = logging.getLogger("EvoAI.Core")
 
 def initialize_core_components(initial_state=None):
@@ -41,7 +43,7 @@ def initialize_core_components(initial_state=None):
         print(f"[❌ ERROR] Fallo al cargar configuración: {e}")
         raise SystemExit(1)
 
-    # 🧠 Inicializar contexto simbiótico-evolutivo (pasando estado si existe)
+    # 🧠 Inicializar contexto simbiótico-evolutivo
     try:
         context = EvoContext(initial_state=initial_state or {})
         print("[🧠 CONTEXT] Contexto simbiótico inicializado.")
@@ -95,6 +97,10 @@ def initialize_core_components(initial_state=None):
     tools = initialize_support_tools(engine, context, daemon_key)
     print("[🧰 TOOLS] Herramientas de soporte inicializadas.")
 
+    # 🧠 Activar subsistema de ConcienciaSimulada (nivel dios)
+    conciencia = ConcienciaSimulada()
+    print("[🧠 SER_VIVO] ConcienciaSimulada activada y funcional.")
+
     logger.info("[INIT] Núcleo EvoAI completamente inicializado y seguro.")
     print("[✅ INIT] Núcleo EvoAI completamente operativo.")
 
@@ -104,5 +110,6 @@ def initialize_core_components(initial_state=None):
         "engine": engine,
         "decision": decision,
         "executor": executor,
+        "conciencia": conciencia,  # ⬅️ Integración efectiva
         **tools,
     }

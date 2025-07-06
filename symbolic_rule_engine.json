@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "id": "rule_example_1",
+      "condition": "context['get']('input') == 'hello'",
+      "action": "context.set('response', 'world')",
+      "confidence": 0.95,
+      "tags": [
+        "greeting",
+        "test"
+      ],
+      "version": "2025-07-02T18:34:50.346094",
+      "checksum": "b2217d1e620a517d99f6f98aa9daf07ee9277998dcaa14b3d023bb12daaf45ae"
+    }
+  ]
+}

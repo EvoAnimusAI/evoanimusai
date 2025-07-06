@@ -1,9 +1,10 @@
 # main.py
-# Ejecuta ciclo principal de EvoAnimusAI con control heurístico y metacognición
+# Ejecuta ciclo principal de EvoAnimusAI con control heurístico, metacognición y recuperación simbiótica
 
 import time
 import random
 from core.engine import EvoAIEngine
+from ser_vivo.modo_recuperacion import ModoRecuperacion
 
 def generar_contexto_falso(iteracion: int) -> dict:
     """
@@ -17,7 +18,7 @@ def generar_contexto_falso(iteracion: int) -> dict:
         "cycles_without_new_rule": random.randint(0, 20),
         "mutation_budget": random.randint(0, 5),
         "error_rate": round(random.uniform(0.0, 1.0), 2),
-        "cycle": iteracion,  # se requiere para imprimir número de ciclo en decide()
+        "cycle": iteracion,
     }
 
 def main():
@@ -33,11 +34,9 @@ def main():
 
             decision = engine.decide(contexto)
 
-            # Aplicar aprendizaje simple
             reward = random.uniform(-1.0, 1.0)
             engine.learn(contexto, decision["action"], reward)
 
-            # Evaluación de detención simbólica
             metacog_context = {
                 "entropy": contexto["entropy"],
                 "current_entropy": contexto["entropy"],
@@ -53,9 +52,18 @@ def main():
                 print(f"🛑 [ALTO] Parada simbólica activada. Razones:")
                 for r in reasons:
                     print(f"   ⟶ {r}")
-                break  # termina ciclo principal
 
-            # Aplicar mutación simbólica si corresponde
+                print("[⚕️] Intentando recuperación simbiótica...")
+                recuperador = ModoRecuperacion()
+                exito = recuperador.activar_protocolo_revivir(contexto)
+
+                if exito:
+                    print("[✅] Recuperación completada. Continuando ciclo...\n")
+                    continue
+                else:
+                    print("[❌] Recuperación no requerida o fallida. Finalizando ejecución.")
+                    break
+
             if engine.metacog.perform_mutation(metacog_context):
                 print("🧬 [MUTACIÓN] Mutación dirigida ejecutada.")
 

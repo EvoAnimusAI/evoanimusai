@@ -1,4 +1,3 @@
-# symbolic_ai/symbolic_rule_engine.py
 import json
 import os
 import logging
@@ -17,25 +16,24 @@ class SymbolicRuleEngine:
         print("[⚙️ INIT] Inicializando SymbolicRuleEngine...")
         self.rules_file = rules_file or RULES_FILE
         self.rules: Dict[str, List[SymbolicRule]] = defaultdict(list)
+        self.facts: Dict[str, Any] = {}  # <--- aquí se almacenan los hechos afirmados
         if auto_load:
             self.load_from_file(self.rules_file)
 
+    def flatten_context(self, d, parent_key='', sep='.'):
+        items = {}
+        for k, v in d.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            if isinstance(v, dict):
+                items.update(self.flatten_context(v, new_key, sep=sep))
+            else:
+                items[new_key] = v
+        if not parent_key:
+            items.update(d)
+        return items
+
     def evaluate(self, contexto: dict) -> List[SymbolicRule]:
-        def flatten_context(d, parent_key='', sep='.'):
-            items = {}
-            for k, v in d.items():
-                new_key = f"{parent_key}{sep}{k}" if parent_key else k
-                if isinstance(v, dict):
-                    items.update(flatten_context(v, new_key, sep=sep))
-                else:
-                    items[new_key] = v
-            if not parent_key:
-                items.update(d)
-            return items
-
         print(f"[🧠 EVALUATE] Contexto recibido: {contexto}")
-
-        # --- Propagación desde last_action ---
         if "last_action" in contexto and isinstance(contexto["last_action"], dict):
             last_action = contexto["last_action"]
             for key in ("entropy", "state", "noise"):
@@ -43,15 +41,12 @@ class SymbolicRuleEngine:
                     if key in last_action and last_action[key] is not None:
                         contexto[key] = last_action[key]
                         print(f"[🛡️ PROPAGATE] {key} extraído desde last_action.{key} → {contexto[key]}")
-
-        flat_context = flatten_context(contexto)
+        flat_context = self.flatten_context(contexto)
         print(f"[🧪 CONTEXTO FLATTEN]: {flat_context}")
-
         matched_rules = []
         total = sum(len(r) for r in self.rules.values())
         count = 0
         print(f"[📊 EVALUATE] Total reglas disponibles: {total}")
-
         for rule_list in self.rules.values():
             for rule in rule_list:
                 count += 1
@@ -65,7 +60,6 @@ class SymbolicRuleEngine:
                 except Exception as exc:
                     logger.error(f"[EVALUATE] Error evaluando regla {rule}: {exc}")
                     print(f"[❌ EVALUATE ERROR] Regla: {rule} — Excepción: {exc}")
-
         print(f"[✅ EVALUATE] Total reglas activadas: {len(matched_rules)}")
         return matched_rules
 
@@ -73,108 +67,25 @@ class SymbolicRuleEngine:
         print(f"[🚀 APPLY_RULES] Ejecutando reglas sobre contexto: {contexto}")
         return self.evaluate(contexto)
 
-    def assert_fact(self, key: str, value: Any) -> List[SymbolicRule]:
-        print(f"[➕ ASSERT_FACT] Afirmando hecho: {key} = {value}")
-        if not isinstance(key, str):
-            raise TypeError(f"[ASSERT_FACT] Clave inválida, se esperaba str y se recibió {type(key)}")
-        contexto = {key: value}
-        matched = self.evaluate(contexto)
-        print(f"[📊 ASSERT_FACT] Reglas activadas: {[r.name for r in matched]}")
-        return matched
-
-    def assert_facts_bulk(self, facts: Dict[str, Any]) -> List[SymbolicRule]:
-        print(f"[📦 ASSERT_FACTS_BULK] Hechos: {facts}")
-        if not isinstance(facts, dict):
-            raise TypeError(f"[ASSERT_FACTS_BULK] Se esperaba dict, se recibió {type(facts)}")
-        matched = self.evaluate(facts)
-        print(f"[📊 BULK] Reglas activadas: {[r.name for r in matched]}")
-        return matched
-
-    def add_rule(self, rule: Union[str, dict, SymbolicRule]) -> None:
-        print(f"[➕ ADD_RULE] Agregando regla: {rule}")
-        if isinstance(rule, str):
-            rule = SymbolicRule.parse(rule)
-        elif isinstance(rule, dict):
-            rule = SymbolicRule.from_dict(rule)
-        elif not isinstance(rule, SymbolicRule):
-            raise TypeError(f"Expected SymbolicRule, dict, or str, got {type(rule)}")
-
-        if any(existing == rule for existing in self.rules.get(rule.rol, [])):
-            logger.warning(f"[ADD_RULE] Regla duplicada ignorada: {rule}")
-            return
-
-        self.rules.setdefault(rule.rol, []).append(rule)
-        self.save_to_file(self.rules_file)
-        logger.info(f"[ADD_RULE] Regla añadida: {rule}")
-
-    def remove_rule(self, rule: Union[str, dict, SymbolicRule]) -> bool:
-        print(f"[🗑️ REMOVE_RULE] Eliminando regla: {rule}")
-        if isinstance(rule, str):
-            rule = SymbolicRule.parse(rule)
-        elif isinstance(rule, dict):
-            rule = SymbolicRule.from_dict(rule)
-        elif not isinstance(rule, SymbolicRule):
-            raise TypeError(f"Expected SymbolicRule, dict, or str, got {type(rule)}")
-
-        rules_for_rol = self.rules.get(rule.rol, [])
-        for i, existing_rule in enumerate(rules_for_rol):
-            if existing_rule == rule:
-                del rules_for_rol[i]
-                self.save_to_file(self.rules_file)
-                logger.info(f"[REMOVE_RULE] Regla eliminada: {rule}")
-                return True
-
-        logger.warning(f"[REMOVE_RULE] No se encontró la regla para eliminar: {rule}")
-        return False
-
-    def update_rule(self, new_rule: dict) -> None:
-        print(f"[🔁 UPDATE_RULE] Actualizando regla con acción: {new_rule.get('action')}")
+    def insertar_regla(self, regla: dict) -> None:
+        print(f"[➕ INSERTAR_REGLA] Insertando regla nueva: {regla}")
+        if not isinstance(regla, dict):
+            raise TypeError("[INSERTAR_REGLA] Se esperaba un diccionario con datos de regla.")
         try:
-            if not isinstance(new_rule, dict):
-                raise TypeError(f"[UPDATE_RULE] Se esperaba dict, se recibió {type(new_rule)}")
-            if 'action' not in new_rule:
-                raise ValueError("[UPDATE_RULE] La regla debe contener la clave 'action'.")
-
-            accion = new_rule['action']
-            actualizado = False
-            for rule_list in self.rules.values():
-                for i, rule in enumerate(rule_list):
-                    if rule.accion == accion:
-                        rule_dict = rule.to_dict()
-                        rule_dict.update(new_rule)
-                        updated_rule = SymbolicRule.from_dict(rule_dict)
-                        rule_list[i] = updated_rule
-                        actualizado = True
-                        logger.info(f"[UPDATE_RULE] Regla actualizada: {updated_rule}")
-                        break
-                if actualizado:
-                    break
-
-            if not actualizado:
-                nueva_regla = SymbolicRule.from_dict(new_rule)
-                self.rules.setdefault(nueva_regla.rol, []).append(nueva_regla)
-                logger.info(f"[UPDATE_RULE] Regla insertada: {nueva_regla}")
-
+            nueva_regla = SymbolicRule.from_dict(regla)
+            if any(r == nueva_regla for r in self.rules.get(nueva_regla.rol, [])):
+                print(f"[⚠️ INSERTAR_REGLA] Regla duplicada detectada, se ignora: {nueva_regla}")
+                return
+            self.rules[nueva_regla.rol].append(nueva_regla)
             self.save_to_file(self.rules_file)
-
+            print(f"[✅ INSERTAR_REGLA] Regla insertada correctamente.")
         except Exception as e:
-            logger.error(f"[UPDATE_RULE] Error: {e}")
+            print(f"[❌ ERROR][INSERTAR_REGLA] Fallo al insertar regla: {e}")
             raise
 
-    def get_rule_by_action(self, accion: str) -> Optional[SymbolicRule]:
-        print(f"[🔍 GET_RULE] Buscando regla por acción: {accion}")
-        for rule_list in self.rules.values():
-            for rule in rule_list:
-                if rule.accion == accion:
-                    return rule
-        return None
-
-    def reset(self) -> None:
-        print("[♻️ RESET] Reiniciando reglas simbólicas...")
-        self.rules.clear()
-        self._add_default_rules()
-        self.save_to_file(self.rules_file)
-        logger.info("[RESET] Entorno simbólico reiniciado con reglas por defecto.")
+    def get_all(self) -> List[SymbolicRule]:
+        print("[📥 GET_ALL] Recuperando todas las reglas...")
+        return [rule for rule_list in self.rules.values() for rule in rule_list]
 
     def clear_rules(self) -> None:
         print("[🧹 CLEAR_RULES] Limpiando todas las reglas simbólicas...")
@@ -182,11 +93,7 @@ class SymbolicRuleEngine:
         logger.info("[CLEAR] Todas las reglas simbólicas han sido eliminadas.")
 
     def save_to_file(self, filepath: str) -> None:
-        all_rules = [
-            rule.to_dict()
-            for rule_list in self.rules.values()
-            for rule in rule_list
-        ]
+        all_rules = [rule.to_dict() for rule_list in self.rules.values() for rule in rule_list]
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump({"rules": all_rules}, f, indent=2, ensure_ascii=False)
@@ -201,24 +108,14 @@ class SymbolicRuleEngine:
             self._add_default_rules()
             self.save_to_file(filepath)
             return
-
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-
             self.rules.clear()
-            rules_data = None
-            if isinstance(data, dict) and "rules" in data:
-                rules_data = data["rules"]
-            elif isinstance(data, list):
-                rules_data = data
-            else:
-                raise ValueError(f"Formato inválido en archivo de reglas: {filepath}")
-
+            rules_data = data.get("rules", [])
             for rule_dict in rules_data:
                 rule_obj = SymbolicRule.from_dict(rule_dict)
-                self.rules.setdefault(rule_obj.rol, []).append(rule_obj)
-
+                self.rules[rule_obj.rol].append(rule_obj)
             self._remove_duplicates()
             self.save_to_file(filepath)
             logger.info(f"[LOAD] Reglas cargadas desde {filepath}")
@@ -256,12 +153,16 @@ class SymbolicRuleEngine:
             SymbolicRule("state", "active", "explore", "pos >= 0"),
         ]
         for rule in default_rules:
-            self.add_rule(rule)
+            self.rules.setdefault(rule.rol, []).append(rule)
 
-    def get_all(self) -> List[SymbolicRule]:
-        print("[📥 GET_ALL] Recuperando todas las reglas...")
-        return [rule for rule_list in self.rules.values() for rule in rule_list]
-
+    def assert_fact(self, key: str, value: Any) -> None:
+        print(f"[➕ ASSERT_FACT] Registrando hecho simbólico: {key} = {value}")
+        try:
+            self.facts[key] = value
+            logger.info(f"[ASSERT_FACT] Hecho registrado: {key} = {value}")
+        except Exception as e:
+            logger.error(f"[ERROR] Fallo en assert_fact('{key}', {value}): {e}")
+            raise
 
 # Instancia global
 symbolic_rule_engine = SymbolicRuleEngine()
