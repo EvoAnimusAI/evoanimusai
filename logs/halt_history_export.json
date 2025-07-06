@@ -1,6 +1,1238 @@
 {
-    "timestamp": "2025-07-06T02:37:06.941087",
+    "timestamp": "2025-07-06T07:38:16.767568",
     "eventos": [
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
+        {
+            "ciclo": -1,
+            "entropy": 0.0,
+            "error_rate": null,
+            "mutation_budget": null,
+            "rewards": [],
+            "sin_nuevas_reglas": null
+        },
         {
             "ciclo": -1,
             "entropy": 0.0,

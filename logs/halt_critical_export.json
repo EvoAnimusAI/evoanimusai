@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2025-07-06T13:45:00Z",
+    "ciclo": 104,
+    "entropia": 0.93,
+    "error_rate": 0.81,
+    "severidad": 9,
+    "tipo": "critical_failure",
+    "razon": "Estado HALT irreversible"
+  },
+  {
+    "timestamp": "2025-07-06T12:30:00Z",
+    "ciclo": 103,
+    "entropia": 0.88,
+    "error_rate": 0.72,
+    "severidad": 8,
+    "tipo": "system_freeze",
+    "razon": "Estancamiento prolongado sin recuperaci\u00f3n"
+  }
+]

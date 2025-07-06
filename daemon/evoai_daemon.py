@@ -3,19 +3,22 @@
 EvoAI Daemon Principal — Nivel gubernamental
 Punto de entrada del sistema simbólico-cognitivo EvoAI.
 """
-
+import sys
 import argparse
 import logging
 import os
 import atexit
+import base64
 from pathlib import Path
 from dotenv import load_dotenv, set_key
-import base64
 from cryptography.fernet import Fernet
+from utils.tee import Tee
 
 # ===================== 🔐 MANEJO DE CLAVE ESTADO ===================== #
 env_path = Path(".env")
 load_dotenv(dotenv_path=env_path)
+
+sys.stdout = Tee('logs/symbolic_log.txt', 'a', sys.stdout)
 
 def generate_fernet_key():
     return base64.urlsafe_b64encode(os.urandom(32)).decode()

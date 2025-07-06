@@ -1,1 +1,47 @@
-[{"timestamp": "2025-07-05T20:11:00Z", "ciclo": 44, "entropia": 0.89, "error_rate": 0.7, "razon": "HALT detectado"}]
+[
+  {
+    "timestamp": "2025-07-06T10:12:00Z",
+    "ciclo": 101,
+    "entropia": 0.91,
+    "error_rate": 0.74,
+    "severidad": 7,
+    "tipo": "entropy_spike",
+    "razon": "HALT por entropía alta"
+  },
+  {
+    "timestamp": "2025-07-06T11:00:00Z",
+    "ciclo": 102,
+    "entropia": 0.85,
+    "error_rate": 0.68,
+    "severidad": 6,
+    "tipo": "metacognitive_error",
+    "razon": "Fallo metacognitivo detectado"
+  },
+  {
+    "timestamp": "2025-07-06T12:30:00Z",
+    "ciclo": 103,
+    "entropia": 0.88,
+    "error_rate": 0.72,
+    "severidad": 8,
+    "tipo": "system_freeze",
+    "razon": "Estancamiento prolongado sin recuperación"
+  },
+  {
+    "timestamp": "2025-07-06T13:45:00Z",
+    "ciclo": 104,
+    "entropia": 0.93,
+    "error_rate": 0.81,
+    "severidad": 9,
+    "tipo": "critical_failure",
+    "razon": "Estado HALT irreversible"
+  },
+  {
+    "timestamp": "2025-07-06T14:10:00Z",
+    "ciclo": 105,
+    "entropia": 0.87,
+    "error_rate": 0.66,
+    "severidad": 5,
+    "tipo": "entropy_warning",
+    "razon": "Alerta de entropía crítica"
+  }
+]
